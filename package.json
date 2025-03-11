@@ -9,7 +9,8 @@
 		"start": "next start",
 		"lint": "biome lint",
 		"format": "biome format --write",
-		"check-types": "tsc"
+		"check-types": "tsc",
+		"precommit": "pnpm check-types ; pnpm lint ; pnpm format"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^4.1.3",
