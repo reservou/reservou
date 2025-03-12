@@ -11,9 +11,11 @@ import { Building2, Calendar, MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function HotelPage({
-	params: { slug },
-}: { params: { slug: string } }) {
+export default async function HotelPage({
+	params,
+}: { params: Promise<{ slug: string }> }) {
+	const { slug } = await params;
+
 	const hotel = {
 		id: 1,
 		name: "Acme Luxury Resort",
@@ -130,7 +132,7 @@ export default function HotelPage({
 						</p>
 						<p className="font-semibold">Book your stay now!</p>
 					</div>
-					<Link href="/reserve" className="w-full sm:w-auto">
+					<Link href={`${slug}/reserve`} className="w-full sm:w-auto ">
 						<Button className="w-full sm:w-auto gap-2">
 							<Calendar className="h-4 w-4" />
 							<span className="font-semibold">Reserve Now</span>
