@@ -130,7 +130,7 @@ export default function HotelPage({
 						</p>
 						<p className="font-semibold">Book your stay now!</p>
 					</div>
-					<Link href="/reserve" className="w-full sm:w-auto">
+					<Link href={`${slug}/reserve`} className="w-full sm:w-auto ">
 						<Button className="w-full sm:w-auto gap-2">
 							<Calendar className="h-4 w-4" />
 							<span className="font-semibold">Reserve Now</span>
