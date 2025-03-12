@@ -11,9 +11,11 @@ import { Building2, Calendar, MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function HotelPage({
-	params: { slug },
-}: { params: { slug: string } }) {
+export default async function HotelPage({
+	params,
+}: { params: Promise<{ slug: string }> }) {
+	const { slug } = await params;
+
 	const hotel = {
 		id: 1,
 		name: "Acme Luxury Resort",
