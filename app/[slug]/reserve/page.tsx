@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/src/lib/utils";
-import { format } from "date-fns";
+import * as DateFNS from "date-fns";
 import {
 	BedDouble,
 	CalendarIcon,
@@ -40,6 +40,9 @@ import {
 	TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 
+/**
+ * @todo Implement this abstraction to come from the API
+ */
 const roomTypes = [
 	{ id: "all", name: "All Rooms" },
 	{ id: "standard", name: "Standard Room" },
@@ -48,6 +51,9 @@ const roomTypes = [
 	{ id: "family", name: "Family Room" },
 ];
 
+/**
+ * @todo Implement this abstraction to come from the API
+ */
 const roomsData = [
 	{
 		id: 1,
@@ -193,11 +199,11 @@ export default function ReservePage({
 									{dateRange.from ? (
 										dateRange.to ? (
 											<>
-												{format(dateRange.from, "MMM d, yyyy")} -{" "}
-												{format(dateRange.to, "MMM d, yyyy")}
+												{DateFNS.format(dateRange.from, "MMM d, yyyy")} -{" "}
+												{DateFNS.format(dateRange.to, "MMM d, yyyy")}
 											</>
 										) : (
-											format(dateRange.from, "MMM d, yyyy")
+											DateFNS.format(dateRange.from, "MMM d, yyyy")
 										)
 									) : (
 										"Select dates"
