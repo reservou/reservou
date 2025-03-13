@@ -4,5 +4,10 @@
 	"tailwindCSS.experimental.classRegex": [
 		["cva\\(((?:[^()]|\\([^()]*\\))*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
 		["cx\\(((?:[^()]|\\([^()]*\\))*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-	]
+	],
+	"spellright.language": ["en-US-10-1."],
+	"spellright.documentTypes": ["markdown", "latex", "plaintext"],
+	"[markdown]": {
+		"editor.defaultFormatter": "denoland.vscode-deno"
+	}
 }
