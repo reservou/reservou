@@ -9,7 +9,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-	title: "Rezervou",
+	title: "reservou",
 	description: "Reservation platform for the modern age",
 };
 

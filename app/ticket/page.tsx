@@ -387,7 +387,7 @@ export default function TicketPage() {
 							</p>
 							<div className="mt-2 flex items-center justify-center gap-1">
 								<p>Booked via</p>
-								<span className="font-semibold text-primary">Rezervou</span>
+								<span className="font-semibold text-primary">reservou</span>
 								<p>on {format(reservationData.createdAt, "MMM d, yyyy")}</p>
 							</div>
 						</div>

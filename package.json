@@ -1,6 +1,6 @@
 {
-	"name": "rezervou",
-	"description": "Reservation infrastructure for businessess",
+	"name": "reservou",
+	"description": "Reservation platform for the modern age",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
