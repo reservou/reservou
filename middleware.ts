@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
 	const protectedRoute = "/dashboard";
 	const isProtectedRoute = pathname.startsWith(protectedRoute);
 
-	const authRoutes = ["/sign-up", "/access"];
+	const authRoutes = ["/sign-up", "/sign-in", "/access"];
 	const isAuthRoute = authRoutes.some((route) =>
 		route === "/access"
 			? pathname.match(/^\/access\/[^/]+$/)
@@ -25,10 +25,7 @@ export async function middleware(request: NextRequest) {
 
 	if (isProtectedRoute) {
 		if (!payload) {
-			/**
-			 * @todo Replace "/sign-up" redirect URL once sign-up page is implemented
-			 */
-			const signInUrl = new URL("/sign-up", request.url);
+			const signInUrl = new URL("/sign-in", request.url);
 			signInUrl.searchParams.set("redirect", pathname);
 			return NextResponse.redirect(signInUrl);
 		}
@@ -47,5 +44,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/dashboard/:path*", "/access/:path*", "/sign-up/:path*"],
+	matcher: [
+		"/dashboard/:path*",
+		"/access/:path*",
+		"/sign-up/:path*",
+		"/sign-in/:path*",
+	],
 };
