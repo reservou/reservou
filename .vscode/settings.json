@@ -1,5 +1,6 @@
 {
 	"editor.defaultFormatter": "biomejs.biome",
+	"prettier.enable": false,
 	// CVA intelisense
 	"tailwindCSS.experimental.classRegex": [
 		["cva\\(((?:[^()]|\\([^()]*\\))*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
