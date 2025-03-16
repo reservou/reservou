@@ -1,128 +1,62 @@
 "use client";
 
-import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { consumeMagicLink } from "@/src/actions/consume-magic-link";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
+import React, { useEffect, useState } from "react";
 
-import {
-	type MagicLinkOutput,
-	consumeMagicLink,
-} from "@/src/actions/consume-magic-link";
-import { Button } from "@/src/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/src/components/ui/card";
-import { useAction } from "@/src/hooks/use-action";
-
-export default function AccessPage({
+export default function AccessTokenPage({
 	params,
-}: {
-	params: React.Usable<{
-		token: string;
-	}>;
-}) {
-	const { token } = React.use(params);
+}: { params: React.Usable<{ token: string }> }) {
 	const router = useRouter();
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
-	const { execute, isLoading, isSuccess, isError, error, data, message } =
-		useAction(consumeMagicLink, {
-			onSuccess: (data: MagicLinkOutput) => {
-				toast.success(message, {
-					description: `Olá, ${data.name}! Você foi autenticado com sucesso.`,
-				});
-				setTimeout(() => {
+	const { token } = React.use(params);
+
+	useEffect(() => {
+		const handleMagicLink = async () => {
+			try {
+				const response = await consumeMagicLink(token);
+
+				if (response.success && response.data) {
 					router.push("/dashboard");
-				}, 1000);
-			},
-			onError: (_, errorMessage) => {
-				toast.error("Erro ao acessar", {
-					description: errorMessage,
-				});
-			},
-			showSuccessToast: false,
-			showErrorToast: false,
-		});
+				} else if (!response.success && response.error) {
+					setErrorMessage(response.message);
+				}
+			} catch (error) {
+				setErrorMessage(
+					"Ocorreu um erro inesperado ao processar o magic link.",
+				);
+			} finally {
+				setIsLoading(false);
+			}
+		};
 
-	React.useEffect(() => {
-		execute(token);
-	}, [token, execute]);
+		handleMagicLink();
+	}, [token, router]);
 
-	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-			<Card className="w-full max-w-md shadow-lg">
-				<CardHeader className="text-center">
-					<CardTitle className="text-2xl">Autenticação</CardTitle>
-					<CardDescription>Verificando seu link de acesso</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col items-center justify-center py-8">
-					{isLoading && (
-						<div className="flex flex-col items-center gap-4">
-							<div className="relative">
-								<div className="h-24 w-24 rounded-full border-4 border-muted-foreground/20" />
-								<Loader2 className="absolute left-0 top-0 h-24 w-24 animate-spin text-primary" />
-							</div>
-							<p className="text-center text-muted-foreground">
-								Estamos verificando seu link de acesso. Isso levará apenas
-								alguns segundos...
-							</p>
-						</div>
-					)}
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<p>Processando seu magic link...</p>
+			</div>
+		);
+	}
 
-					{isSuccess && (
-						<div className="flex flex-col items-center gap-4">
-							<div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary/20 bg-primary/10">
-								<CheckCircle className="h-16 w-16 text-primary" />
-							</div>
-							<div className="text-center">
-								<p className="text-xl font-medium">
-									Autenticação bem-sucedida!
-								</p>
-								<p className="mt-1 text-muted-foreground">
-									Olá, {data?.name}! Você será redirecionado para o dashboard em
-									instantes.
-								</p>
-							</div>
-						</div>
-					)}
+	if (errorMessage) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center p-6 max-w-md">
+					<h1 className="text-2xl font-bold mb-4">Falha na Autenticação</h1>
+					<p className="text-red-600 mb-4">{errorMessage}</p>
+					<Link href="/sign-in" className="text-blue-600 hover:underline">
+						Voltar para o Login
+					</Link>
+				</div>
+			</div>
+		);
+	}
 
-					{isError && (
-						<div className="flex flex-col items-center gap-4">
-							<div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-destructive/20 bg-destructive/10">
-								<XCircle className="h-16 w-16 text-destructive" />
-							</div>
-							<div className="text-center">
-								<p className="text-xl font-medium">Falha na autenticação</p>
-								<p className="mt-1 text-muted-foreground">
-									{
-										"O link de acesso é inválido ou expirou. Por favor, solicite um novo link."
-									}
-								</p>
-							</div>
-						</div>
-					)}
-				</CardContent>
-				<CardFooter className="flex justify-center">
-					{isError && (
-						<Button onClick={() => router.push("/login")} className="w-full">
-							Voltar para o login
-						</Button>
-					)}
-					{isSuccess && (
-						<Button
-							onClick={() => router.push("/dashboard")}
-							className="w-full"
-						>
-							Ir para o dashboard
-						</Button>
-					)}
-				</CardFooter>
-			</Card>
-		</div>
-	);
+	return null;
 }
