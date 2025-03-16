@@ -6,7 +6,7 @@ import { database } from "../lib/database";
 import { encryptJwt, setJwtToken } from "../lib/jwt";
 import { redis } from "../lib/redis";
 import { UserModel } from "../models/user";
-import type { SignUpIntent } from "../types";
+import type { AccessTokenPayload, SignUpIntent } from "../types";
 
 export type MagicLinkOutput = {
 	id: string;
@@ -46,7 +46,11 @@ export const consumeMagicLink = buildAction(
 
 		const { id } = await user.save();
 
-		const jwtToken = await encryptJwt({ id, email, name: user.name });
+		const jwtToken = await encryptJwt({
+			id,
+			email,
+			name: user.name,
+		} satisfies AccessTokenPayload);
 		await setJwtToken(jwtToken);
 
 		return {
