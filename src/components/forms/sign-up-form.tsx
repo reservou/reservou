@@ -95,7 +95,6 @@ export function SignUpForm() {
 
 		setIsGoogleLoading(true);
 		try {
-			// Open Google sign-in popup
 			const result = await signInWithPopup(firebaseAuth, googleProvider);
 			const idToken = await result.user.getIdToken();
 
