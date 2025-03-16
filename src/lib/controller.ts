@@ -1,8 +1,16 @@
 import { type ErrorObject, HttpError, InternalServerError } from "@/src/errors";
 import { NextResponse } from "next/server";
 
-type BaseResponse<Data = unknown> = {
-	data: Data | null;
+type BaseResponse<Data = unknown> =
+	| {
+			data: Data | null;
+			error: ErrorObject | null;
+			message: string;
+	  }
+	| unknown;
+
+type ApiErrorResponse = {
+	data: null;
 	error: ErrorObject | null;
 	message: string;
 };
@@ -102,4 +110,4 @@ function buildController<Data = unknown>(
 }
 
 export { buildController };
-export type { BaseResponse };
+export type { ApiErrorResponse, BaseResponse };
