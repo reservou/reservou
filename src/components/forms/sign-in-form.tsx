@@ -1,7 +1,7 @@
 "use client";
 
-import { signUpWithGoogle } from "@/src/actions/sign-up-with-google";
-import { signUpWithMagicLink } from "@/src/actions/sign-up-with-magic-link";
+import { signInWithGoogle } from "@/src/actions/sign-in-with-google";
+import { signInWithMagicLink } from "@/src/actions/sign-in-with-magic-link";
 import { Button } from "@/src/components/ui/button";
 import {
 	Form,
@@ -19,7 +19,7 @@ import {
 	googleProvider,
 	signInWithPopup,
 } from "@/src/lib/firebase/client";
-import { type SignUpInput, signUpSchema } from "@/src/schemas/sign-up-schema";
+import { type SignInInput, signInSchema } from "@/src/schemas/sign-in-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, Loader2, MailIcon } from "lucide-react";
 import Image from "next/image";
@@ -30,15 +30,14 @@ import { useForm } from "react-hook-form";
 import { SiGoogle } from "react-icons/si";
 import { toast } from "sonner";
 
-export function SignUpForm() {
+export function SignInForm() {
 	const router = useRouter();
 	const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
 
-	const form = useForm<SignUpInput>({
-		resolver: zodResolver(signUpSchema),
+	const form = useForm<SignInInput>({
+		resolver: zodResolver(signInSchema),
 		defaultValues: {
 			email: "",
-			name: "",
 		},
 	});
 
@@ -46,7 +45,7 @@ export function SignUpForm() {
 		execute: proceedWithMagicLink,
 		isLoading: isMagicLinkLoading,
 		isSuccess: isMagicLinkSuccess,
-	} = useAction(signUpWithMagicLink, {
+	} = useAction(signInWithMagicLink, {
 		onSuccess: () => {
 			toast.success("Enviamos um link de acesso, verifique seu e-mail.");
 		},
@@ -58,7 +57,7 @@ export function SignUpForm() {
 	});
 
 	const { execute: proceedWithGoogle, isLoading: isGoogleActionLoading } =
-		useAction(signUpWithGoogle, {
+		useAction(signInWithGoogle, {
 			onSuccess: (data) => {
 				toast.success("Bem-vindo!", {
 					description: `Olá, ${data.name}! Você foi autenticado com sucesso.`,
@@ -76,29 +75,17 @@ export function SignUpForm() {
 			showErrorToast: false,
 		});
 
-	async function onMagicLinkSubmit(data: SignUpInput) {
+	async function onMagicLinkSubmit(data: SignInInput) {
 		await proceedWithMagicLink(data);
 	}
 
 	const handleGoogleSignIn = async () => {
-		const name = form.getValues("name");
-
-		if (!name || name.trim() === "") {
-			form.setError("name", {
-				type: "manual",
-				message: "Por favor, informe seu nome antes de prosseguir com Google.",
-			});
-			return;
-		}
-
-		form.clearErrors();
-
 		setIsGoogleLoading(true);
 		try {
 			const result = await signInWithPopup(firebaseAuth, googleProvider);
 			const idToken = await result.user.getIdToken();
 
-			await proceedWithGoogle({ idToken, name });
+			await proceedWithGoogle(idToken);
 		} catch (error) {
 			console.error("Google sign-in error:", error);
 			toast.error("Erro ao tentar login com Google", {
@@ -122,11 +109,9 @@ export function SignUpForm() {
 			</div>
 
 			<div className="space-y-2 text-center">
-				<h1 className="text-2xl font-semibold tracking-tight">
-					Criar uma conta
-				</h1>
+				<h1 className="text-2xl font-semibold tracking-tight">Entrar</h1>
 				<p className="text-sm text-muted-foreground">
-					Cadastre-se para começar a usar nossa plataforma
+					Faça login para acessar sua conta
 				</p>
 			</div>
 
@@ -143,7 +128,7 @@ export function SignUpForm() {
 					) : (
 						<SiGoogle className="mr-2 h-4 w-4" />
 					)}
-					Cadastrar com Google
+					Entrar com Google
 				</Button>
 
 				<div className="relative">
@@ -152,7 +137,7 @@ export function SignUpForm() {
 					</div>
 					<div className="relative flex justify-center text-xs uppercase">
 						<span className="bg-background px-2 text-muted-foreground">
-							Ou continue com
+							Ou entre com
 						</span>
 					</div>
 				</div>
@@ -162,20 +147,6 @@ export function SignUpForm() {
 						onSubmit={form.handleSubmit(onMagicLinkSubmit)}
 						className="space-y-4"
 					>
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Nome</FormLabel>
-									<FormControl>
-										<Input placeholder="Digite seu nome" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
 						<FormField
 							control={form.control}
 							name="email"
@@ -204,37 +175,19 @@ export function SignUpForm() {
 							)}
 							{isMagicLinkSuccess
 								? "Link de acesso enviado"
-								: "Cadastrar com Magic Link"}
+								: "Entrar com Magic Link"}
 						</Button>
 					</form>
 				</Form>
 			</div>
 
 			<div className="text-center text-sm">
-				Ao se cadastrar, você concorda com nossos{" "}
+				Não possui uma conta?{" "}
 				<Link
-					href="/terms"
+					href="/sign-up"
 					className="underline underline-offset-4 hover:text-primary"
 				>
-					Termos de Serviço
-				</Link>{" "}
-				e{" "}
-				<Link
-					href="/privacy"
-					className="underline underline-offset-4 hover:text-primary"
-				>
-					Política de Privacidade
-				</Link>
-				.
-			</div>
-
-			<div className="text-center text-sm">
-				Já possui uma conta?{" "}
-				<Link
-					href="/sign-in"
-					className="underline underline-offset-4 hover:text-primary"
-				>
-					Entrar
+					Cadastre-se
 				</Link>
 			</div>
 		</div>
