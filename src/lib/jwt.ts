@@ -100,3 +100,12 @@ export async function setJwtToken(
 
 	cookieStore.set(AUTH_COOKIE_NAME, token, finalOptions);
 }
+
+/**
+ * Clears the JWT token from cookies, effectively logging out the user.
+ * @returns Promise that resolves when the cookie is cleared
+ */
+export async function clearJwtFromCookies(): Promise<void> {
+	const cookieStore = await cookies();
+	cookieStore.delete(AUTH_COOKIE_NAME);
+}

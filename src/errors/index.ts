@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createId } from "@paralleldrive/cuid2";
 
 export interface HttpErrorOptions {
 	statusCode?: number;
@@ -32,7 +32,7 @@ export class HttpError extends Error {
 		this.status = options.status || "error";
 		this.details = options.details;
 		this.code = options.code;
-		this.correlationId = options.correlationId || randomUUID();
+		this.correlationId = options.correlationId || createId();
 
 		if (options.cause) {
 			this.stack = `${this.stack}\nCaused by: ${options.cause.stack}`;

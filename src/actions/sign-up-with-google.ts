@@ -6,6 +6,7 @@ import { database } from "../lib/database";
 import { auth } from "../lib/firebase/admin";
 import { encryptJwt, setJwtToken } from "../lib/jwt";
 import { UserModel } from "../models/user";
+import type { AccessTokenPayload } from "../types";
 
 export type GoogleSignUpOutput = {
 	id: string;
@@ -57,7 +58,11 @@ export const signUpWithGoogle = buildAction(
 
 		const { id } = user;
 
-		const jwtToken = await encryptJwt({ id, email, name: user.name });
+		const jwtToken = await encryptJwt({
+			id,
+			email,
+			name: user.name,
+		} satisfies AccessTokenPayload);
 		await setJwtToken(jwtToken);
 
 		return {

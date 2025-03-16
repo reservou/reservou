@@ -99,8 +99,9 @@ export default function AccessPage({
 							<div className="text-center">
 								<p className="text-xl font-medium">Falha na autenticação</p>
 								<p className="mt-1 text-muted-foreground">
-									{error ||
-										"O link de acesso é inválido ou expirou. Por favor, solicite um novo link."}
+									{
+										"O link de acesso é inválido ou expirou. Por favor, solicite um novo link."
+									}
 								</p>
 							</div>
 						</div>
