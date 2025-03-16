@@ -1,3 +1,5 @@
+import { ThemeProvider } from "@/src/components/providers/theme-provider";
+import { Toaster } from "@/src/components/ui/sonner";
 import { cn } from "@/src/lib/utils";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
@@ -9,7 +11,10 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-	title: "reservou",
+	title: {
+		default: "Reservou",
+		template: "%s | Reservou",
+	},
 	description: "Reservation platform for the modern age",
 };
 
@@ -19,11 +24,19 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body
-				className={cn(montserrat.className, "bg-background text-foreground")}
+				className={cn(
+					montserrat.className,
+					"min-h-screen bg-background font-sans antialiased",
+				)}
 			>
-				{children}
+				<ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+					<div className="relative flex min-h-screen flex-col">
+						<main className="flex-1">{children}</main>
+					</div>
+					<Toaster />
+				</ThemeProvider>
 			</body>
 		</html>
 	);

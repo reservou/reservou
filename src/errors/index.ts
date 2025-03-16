@@ -10,6 +10,15 @@ export interface HttpErrorOptions {
 	cause?: Error;
 }
 
+export interface ErrorObject {
+	statusCode: number;
+	status: string;
+	details?: string | Record<string, unknown>;
+	code?: number | string;
+	correlationId: string;
+	message: string;
+}
+
 export class HttpError extends Error {
 	public readonly statusCode: number;
 	public readonly status: string;
@@ -35,7 +44,7 @@ export class HttpError extends Error {
 		});
 	}
 
-	toJSON() {
+	toJSON(): ErrorObject {
 		return {
 			status: this.status,
 			statusCode: this.statusCode,
