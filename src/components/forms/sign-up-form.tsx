@@ -21,7 +21,7 @@ import {
 } from "@/src/lib/firebase/client";
 import { type SignUpInput, signUpSchema } from "@/src/schemas/sign-up-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckIcon, Loader2, MailIcon } from "lucide-react";
+import { CheckIcon, MailIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { SiGoogle } from "react-icons/si";
 import { toast } from "sonner";
+import { Loading } from "../animations/loading";
 
 export function SignUpForm() {
 	const router = useRouter();
@@ -139,7 +140,7 @@ export function SignUpForm() {
 					className="w-full"
 				>
 					{isGoogleLoading || isGoogleActionLoading ? (
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<Loading />
 					) : (
 						<SiGoogle className="mr-2 h-4 w-4" />
 					)}
@@ -196,7 +197,7 @@ export function SignUpForm() {
 							disabled={isMagicLinkLoading || isMagicLinkSuccess}
 						>
 							{isMagicLinkLoading ? (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<Loading />
 							) : isMagicLinkSuccess ? (
 								<CheckIcon className="mr-2 h-4 w-4" />
 							) : (
