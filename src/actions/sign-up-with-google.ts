@@ -56,13 +56,13 @@ export const signUpWithGoogle = buildAction(
 			}
 		}
 
-		const { id } = user;
+		const { id, hotel } = user;
 
 		const jwtToken = await encryptJwt({
-			id,
-			email,
-			name: user.name,
+			uid: id,
+			hid: hotel?._id.toString(),
 		} satisfies AccessTokenPayload);
+
 		await setJwtToken(jwtToken);
 
 		return {

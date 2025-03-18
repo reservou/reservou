@@ -3,8 +3,10 @@ export type SignUpIntent = {
 	email: string;
 };
 
+/**
+ * Holds the userId `uid` and hotelId if present `hid`
+ */
 export type AccessTokenPayload = {
-	id: string;
-	name: string;
-	email: string;
+	uid: string;
+	hid?: string;
 };

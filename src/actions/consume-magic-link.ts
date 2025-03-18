@@ -47,9 +47,7 @@ export const consumeMagicLink = buildAction(
 		const { id } = await user.save();
 
 		const jwtToken = await encryptJwt({
-			id,
-			email,
-			name: user.name,
+			uid: id,
 		} satisfies AccessTokenPayload);
 		await setJwtToken(jwtToken);
 

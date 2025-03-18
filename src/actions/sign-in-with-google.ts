@@ -30,16 +30,20 @@ export const signInWithGoogle = buildAction(
 
 		await database.connect();
 
-		const user = await UserModel.findOne({ email });
+		const user = await UserModel.findOne({ email }, { hotel: true });
 		if (!user) {
 			throw new BadRequestError(
 				"Usuário não encontrado. Por favor, cadastre-se.",
 			);
 		}
 
-		const { id, name } = user;
+		const { id, name, hotel } = user;
 
-		const jwtPayload: AccessTokenPayload = { id, email, name };
+		const jwtPayload: AccessTokenPayload = {
+			uid: id,
+			hid: hotel?.id.toString(),
+		};
+
 		const jwtToken = await encryptJwt(jwtPayload);
 		await setJwtToken(jwtToken);
 
