@@ -10,6 +10,7 @@ export interface Environment {
 	REDIS_URL: string;
 	REDIS_TOKEN: string;
 	NEXT_PUBLIC_APP_URL: string;
+	GMAPS_API_KEY: string;
 }
 
 export const getEnv = <K extends keyof Environment>(
