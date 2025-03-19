@@ -1,3 +1,5 @@
+"use server";
+
 import { AUTH_COOKIE_NAME } from "@/src/constants/auth";
 import { getEnv } from "@/src/env";
 import { UnauthorizedError } from "@/src/errors";
@@ -54,14 +56,22 @@ export async function decryptJwt<T>(token: string): Promise<T> {
 }
 
 /**
+ * Retrieves the JWT token from cookies.
+ * @returns The JWT token string or null if not found
+ */
+export async function getJwtFromCookies(): Promise<string | null> {
+	const cookieStore = await cookies();
+	const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+	return token || null;
+}
+
+/**
  * Extracts and verifies the JWT token from request cookies.
  * @returns The decoded payload or null if no valid token is found
  * @throws UnauthorizedError if the token exists but is invalid
  */
 export async function getJwtPayloadFromCookies<T>(): Promise<T | null> {
-	const { cookies } = await import("next/headers");
-	const cookieStore = await cookies();
-	const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+	const token = await getJwtFromCookies();
 
 	if (!token) {
 		return null;
