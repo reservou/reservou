@@ -4,7 +4,7 @@ import { BadRequestError } from "../errors";
 import { buildAction } from "../lib/action";
 import { database } from "../lib/database";
 import { auth } from "../lib/firebase/admin";
-import { encryptJwt, setJwtToken } from "../lib/jwt";
+import { encryptJwt, setJwtToCookies } from "../lib/jwt";
 import { UserModel } from "../models/user";
 import type { AccessTokenPayload } from "../types";
 
@@ -30,7 +30,7 @@ export const signInWithGoogle = buildAction(
 
 		await database.connect();
 
-		const user = await UserModel.findOne({ email }, { hotel: true });
+		const user = await UserModel.findOne({ email });
 		if (!user) {
 			throw new BadRequestError(
 				"Usuário não encontrado. Por favor, cadastre-se.",
