@@ -45,8 +45,7 @@ export const signInWithGoogle = buildAction(
 		};
 
 		const jwtToken = await encryptJwt(jwtPayload);
-		await setJwtToken(jwtToken);
-
+		await setJwtToCookies(jwtToken);
 		return {
 			id,
 			name,

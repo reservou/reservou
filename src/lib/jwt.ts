@@ -76,7 +76,7 @@ export async function getJwtPayloadFromCookies<T>(): Promise<T | null> {
  * @param options Cookie options (optional)
  * @returns Promise that resolves when the cookie is set
  */
-export async function setJwtToken(
+export async function setJwtToCookies(
 	token: string,
 	options: Partial<{
 		expires: Date | number;
