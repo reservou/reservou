@@ -3,18 +3,33 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AccessTokenPayload } from "./src/types";
 
-export async function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
+const PROTECTED_ROUTES = ["/dashboard", "/setup"];
+const AUTH_ROUTES = ["/sign-up", "/sign-in", "/access"];
 
-	const protectedRoute = "/dashboard";
-	const isProtectedRoute = pathname.startsWith(protectedRoute);
+const isProtectedPath = (pathname: string): boolean =>
+	PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
-	const authRoutes = ["/sign-up", "/sign-in", "/access"];
-	const isAuthRoute = authRoutes.some((route) =>
+const isAuthPath = (pathname: string): boolean =>
+	AUTH_ROUTES.some((route) =>
 		route === "/access"
-			? pathname.match(/^\/access\/[^/]+$/)
+			? !!pathname.match(/^\/access\/[^/]+$/)
 			: pathname.startsWith(route),
 	);
+
+const redirectTo = (url: string, request: NextRequest, redirect?: string) => {
+	const redirectUrl = new URL(url, request.url);
+	if (redirect) {
+		redirectUrl.searchParams.set("redirect", redirect);
+	}
+	return NextResponse.redirect(redirectUrl);
+};
+
+const getAuthenticatedDestination = (payload: AccessTokenPayload): string => {
+	return payload.hid ? "/dashboard" : "/setup";
+};
+
+export async function middleware(request: NextRequest) {
+	const { pathname } = request.nextUrl;
 
 	let payload: AccessTokenPayload | null;
 	try {
@@ -23,20 +38,28 @@ export async function middleware(request: NextRequest) {
 		payload = null;
 	}
 
-	if (isProtectedRoute) {
+	if (isProtectedPath(pathname)) {
 		if (!payload) {
-			const signInUrl = new URL("/sign-in", request.url);
-			signInUrl.searchParams.set("redirect", pathname);
-			return NextResponse.redirect(signInUrl);
+			return redirectTo("/sign-in", request, pathname);
 		}
+
+		if (pathname.startsWith("/dashboard") && !payload.hid) {
+			return redirectTo("/setup", request, pathname);
+		}
+
+		if (pathname.startsWith("/setup") && payload.hid) {
+			return redirectTo("/dashboard", request, pathname);
+		}
+
 		return NextResponse.next();
 	}
 
-	if (isAuthRoute) {
+	if (isAuthPath(pathname)) {
 		if (payload) {
-			const dashboardUrl = new URL("/dashboard", request.url);
-			return NextResponse.redirect(dashboardUrl);
+			const destination = getAuthenticatedDestination(payload);
+			return redirectTo(destination, request);
 		}
+
 		return NextResponse.next();
 	}
 
@@ -46,6 +69,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
 	matcher: [
 		"/dashboard/:path*",
+		"/setup/:path",
 		"/access/:path*",
 		"/sign-up/:path*",
 		"/sign-in/:path*",
