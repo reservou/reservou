@@ -1,8 +1,8 @@
 "use server";
 
-import { AUTH_COOKIE_NAME } from "@/src/constants/auth";
 import { getEnv } from "@/src/env";
-import { UnauthorizedError } from "@/src/errors";
+import { UnauthorizedError } from "@/src/lib/errors";
+import { AUTH_COOKIE_NAME } from "@/src/modules/auth/constants";
 import * as jose from "jose";
 import {
 	JWSInvalid,

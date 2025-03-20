@@ -40,8 +40,8 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 
-import { hotelSetup } from "@/src/actions/hotel-setup";
 import { useAction } from "@/src/hooks/use-action";
+import { hotelSetup } from "@/src/modules/hotel/actions/hotel-setup";
 import {
 	type BasicInfoFormValues,
 	type ContactFormValues,
@@ -51,7 +51,7 @@ import {
 	contactSchema,
 	hotelSetupSchema,
 	locationSchema,
-} from "@/src/schemas/hotel-setup-schema";
+} from "@/src/modules/hotel/schemas/hotel-setup-schema";
 
 const hotelCategories = [
 	{ id: "hotel", name: "Hotel" },

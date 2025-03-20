@@ -1,6 +1,6 @@
 import type { NavItem } from "@/app/dashboard/layout";
-import type { GetCurrentUserOutput } from "@/src/actions/get-current-user";
 import { cn } from "@/src/lib/utils";
+import type { GetCurrentUserOutput } from "@/src/modules/auth/actions/get-current-user";
 import { User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

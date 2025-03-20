@@ -1,11 +1,11 @@
 "server-only";
 
-import { getCurrentUser } from "@/src/actions/get-current-user";
-import { InternalServerError, UnauthorizedError } from "@/src/errors";
 import { database } from "@/src/lib/database";
+import { InternalServerError, UnauthorizedError } from "@/src/lib/errors";
 import { getJwtFromCookies, getJwtPayloadFromCookies } from "@/src/lib/jwt";
-import { UserModel } from "@/src/models/user";
-import type { AccessTokenPayload } from "@/src/types";
+import { getCurrentUser } from "@/src/modules/auth/actions/get-current-user";
+import { UserModel } from "@/src/modules/auth/models/user";
+import type { AccessTokenPayload } from "@/src/modules/auth/types";
 
 /**
  * Helper function to be used inside server actions, not to be called from client

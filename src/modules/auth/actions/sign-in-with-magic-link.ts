@@ -1,14 +1,14 @@
 "use server";
 
 import { uid } from "uid";
-import { CONFIRMATION_TOKEN_EXPIRY_IN_MINUTES } from "../constants/auth";
-import { getEnv } from "../env";
-import { BadRequestError } from "../errors";
-import { buildAction } from "../lib/action";
-import { database } from "../lib/database";
-import { mailer } from "../lib/mailer";
-import { redis } from "../lib/redis";
-import { validator } from "../lib/validator";
+import { getEnv } from "../../../env";
+import { buildAction } from "../../../lib/action";
+import { database } from "../../../lib/database";
+import { BadRequestError } from "../../../lib/errors";
+import { mailer } from "../../../lib/mailer";
+import { redis } from "../../../lib/redis";
+import { validator } from "../../../lib/validator";
+import { CONFIRMATION_TOKEN_EXPIRY_IN_MINUTES } from "../constants";
 import { type IUserModel, UserModel } from "../models/user";
 import { type SignInInput, signInSchema } from "../schemas/sign-in-schema";
 import type { SignUpIntent } from "../types";

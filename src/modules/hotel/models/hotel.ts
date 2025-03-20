@@ -2,9 +2,9 @@ import {
 	type SlugGenerationParams,
 	generateBaseSlug,
 	slugStrategies,
-} from "@/src/utils/generate-base-slug";
+} from "@/src/modules/hotel/utils/generate-base-slug";
 import { type Model, Schema } from "mongoose";
-import { resolveMongooseModel } from "../utils/resolve-mongoose-model";
+import { resolveMongooseModel } from "../../../lib/database";
 import { Plan } from "./plan";
 
 export interface IHotel {

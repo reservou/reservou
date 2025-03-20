@@ -8,7 +8,7 @@
 
 import Redis from "ioredis";
 import { getEnv } from "../env";
-import { InternalServerError } from "../errors";
+import { InternalServerError } from "./errors";
 
 function initializeRedis() {
 	const redisUrl = getEnv("REDIS_URL");

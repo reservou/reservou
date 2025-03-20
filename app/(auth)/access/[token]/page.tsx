@@ -1,6 +1,6 @@
 "use client";
 
-import { consumeMagicLink } from "@/src/actions/consume-magic-link";
+import { consumeMagicLink } from "@/src/modules/auth/actions/consume-magic-link";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";

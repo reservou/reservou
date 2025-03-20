@@ -1,7 +1,5 @@
 "use client";
 
-import { signUpWithGoogle } from "@/src/actions/sign-up-with-google";
-import { signUpWithMagicLink } from "@/src/actions/sign-up-with-magic-link";
 import { Button } from "@/src/components/ui/button";
 import {
 	Form,
@@ -19,7 +17,12 @@ import {
 	googleProvider,
 	signInWithPopup,
 } from "@/src/lib/firebase/client";
-import { type SignUpInput, signUpSchema } from "@/src/schemas/sign-up-schema";
+import { signUpWithGoogle } from "@/src/modules/auth/actions/sign-up-with-google";
+import { signUpWithMagicLink } from "@/src/modules/auth/actions/sign-up-with-magic-link";
+import {
+	type SignUpInput,
+	signUpSchema,
+} from "@/src/modules/auth/schemas/sign-up-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, MailIcon } from "lucide-react";
 import Image from "next/image";

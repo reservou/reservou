@@ -1,10 +1,10 @@
 "use server";
 
-import { InternalServerError, UnauthorizedError } from "../errors";
-import { buildAction } from "../lib/action";
-import { database } from "../lib/database";
-import { getJwtFromCookies, getJwtPayloadFromCookies } from "../lib/jwt";
-import { UserModel, type UserRole } from "../models/user";
+import { buildAction } from "@/src/lib/action";
+import { database } from "@/src/lib/database";
+import { InternalServerError, UnauthorizedError } from "@/src/lib/errors";
+import { getJwtFromCookies, getJwtPayloadFromCookies } from "@/src/lib/jwt";
+import { UserModel, type UserRole } from "@/src/modules/auth/models/user";
 import type { AccessTokenPayload } from "../types";
 
 export type GetCurrentUserOutput = {

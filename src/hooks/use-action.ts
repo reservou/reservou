@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { type ErrorObject, InternalServerError } from "../errors";
 import type { ActionResponse } from "../lib/action";
+import { type ErrorObject, InternalServerError } from "../lib/errors";
 
 type UseActionOptions<T> = {
 	onSuccess?: (data: T) => void;

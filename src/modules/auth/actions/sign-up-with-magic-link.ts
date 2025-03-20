@@ -1,12 +1,12 @@
 "use server";
 
 import { uid } from "uid";
-import { CONFIRMATION_TOKEN_EXPIRY_IN_MINUTES } from "../constants/auth";
-import { getEnv } from "../env";
-import { buildAction } from "../lib/action";
-import { mailer } from "../lib/mailer";
-import { redis } from "../lib/redis";
-import { validator } from "../lib/validator";
+import { getEnv } from "../../../env";
+import { buildAction } from "../../../lib/action";
+import { mailer } from "../../../lib/mailer";
+import { redis } from "../../../lib/redis";
+import { validator } from "../../../lib/validator";
+import { CONFIRMATION_TOKEN_EXPIRY_IN_MINUTES } from "../constants";
 import { type SignUpInput, signUpSchema } from "../schemas/sign-up-schema";
 import type { SignUpIntent } from "../types";
 

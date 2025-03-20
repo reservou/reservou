@@ -1,7 +1,7 @@
 import { getJwtPayloadFromCookies } from "@/src/lib/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { AccessTokenPayload } from "./src/types";
+import type { AccessTokenPayload } from "./src/modules/auth/types";
 
 const PROTECTED_ROUTES = ["/dashboard", "/setup"];
 const AUTH_ROUTES = ["/sign-up", "/sign-in", "/access"];

@@ -1,7 +1,7 @@
 import type { Model, Types } from "mongoose";
 import { Schema } from "mongoose";
-import { resolveMongooseModel } from "../utils/resolve-mongoose-model";
-import { HOTEL_MODEL_KEY } from "./hotel";
+import { resolveMongooseModel } from "../../../lib/database";
+import { HOTEL_MODEL_KEY } from "../../hotel/models/hotel";
 
 export enum UserRole {
 	HOTEL = "HOTEL",

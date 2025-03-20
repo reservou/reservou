@@ -1,20 +1,24 @@
 "use server";
 
-import { InternalServerError } from "../errors";
-import { buildAction } from "../lib/action";
-import { database } from "../lib/database";
-import { geocodeAddress } from "../lib/geocode";
-import { clearJwtFromCookies, encryptJwt, setJwtToCookies } from "../lib/jwt";
-import { validator } from "../lib/validator";
+import { buildAction } from "@/src/lib/action";
+import { database } from "@/src/lib/database";
+import { InternalServerError } from "@/src/lib/errors";
+import { geocodeAddress } from "@/src/lib/geocode";
+import {
+	clearJwtFromCookies,
+	encryptJwt,
+	setJwtToCookies,
+} from "@/src/lib/jwt";
+import { validator } from "@/src/lib/validator";
+import type { AccessTokenPayload } from "@/src/modules/auth/types";
+import { getCurrentUserOrThrow } from "@/src/modules/auth/utils/get-current-user-or-throw";
 import { HotelModel, generateUniqueSlug } from "../models/hotel";
 import { Plan } from "../models/plan";
 import {
 	type HotelSetupFormValues as HotelSetupInput,
 	hotelSetupSchema,
 } from "../schemas/hotel-setup-schema";
-import type { AccessTokenPayload } from "../types";
 import { buildAddressString } from "../utils/build-address-string";
-import { getCurrentUserOrThrow } from "../utils/get-current-user-or-throw";
 
 export const hotelSetup = buildAction(async (input: HotelSetupInput) => {
 	const {

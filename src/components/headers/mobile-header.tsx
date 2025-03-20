@@ -1,4 +1,3 @@
-import type { GetCurrentUserOutput } from "@/src/actions/get-current-user";
 import {
 	Dialog,
 	DialogContent,
@@ -7,6 +6,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/src/components/ui/dialog";
+import type { GetCurrentUserOutput } from "@/src/modules/auth/actions/get-current-user";
 import { Home, User } from "lucide-react";
 import Image from "next/image";
 import { SettingsLink } from "../sidebar/settings-link";

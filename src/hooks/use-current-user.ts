@@ -3,7 +3,7 @@
 import {
 	type GetCurrentUserOutput,
 	getCurrentUser,
-} from "@/src/actions/get-current-user";
+} from "@/src/modules/auth/actions/get-current-user";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 

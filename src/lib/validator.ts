@@ -1,4 +1,4 @@
-import { BadRequestError, InternalServerError } from "@/src/errors";
+import { BadRequestError, InternalServerError } from "@/src/lib/errors";
 import { ZodError, type ZodSchema, type z } from "zod";
 
 /**

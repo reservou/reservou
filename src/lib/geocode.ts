@@ -1,7 +1,7 @@
 "server-only";
 
 import { getEnv } from "../env";
-import { InternalServerError, NotFoundError } from "../errors";
+import { InternalServerError, NotFoundError } from "./errors";
 
 export type Geocode = {
 	lat: number;

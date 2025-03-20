@@ -1,4 +1,8 @@
-import { type ErrorObject, HttpError, InternalServerError } from "@/src/errors";
+import {
+	type ErrorObject,
+	HttpError,
+	InternalServerError,
+} from "@/src/lib/errors";
 
 export type ActionResponse<T = null> =
 	| {

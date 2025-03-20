@@ -1,4 +1,8 @@
-import { type ErrorObject, HttpError, InternalServerError } from "@/src/errors";
+import {
+	type ErrorObject,
+	HttpError,
+	InternalServerError,
+} from "@/src/lib/errors";
 import { NextResponse } from "next/server";
 
 type BaseResponse<Data = unknown> =

@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import { HttpStatus } from "./constants";
 
 export interface HttpErrorOptions {
 	statusCode?: number;
@@ -59,7 +60,7 @@ export class HttpError extends Error {
 export class BadRequestError extends HttpError {
 	constructor(message = "Bad Request", details?: HttpErrorOptions["details"]) {
 		super({
-			statusCode: 400,
+			statusCode: HttpStatus.BAD_REQUEST,
 			status: "error",
 			message,
 			details,
@@ -70,7 +71,7 @@ export class BadRequestError extends HttpError {
 export class UnauthorizedError extends HttpError {
 	constructor(message = "Unauthorized", details?: HttpErrorOptions["details"]) {
 		super({
-			statusCode: 401,
+			statusCode: HttpStatus.UNAUTHORIZED,
 			status: "error",
 			message,
 			details,
@@ -81,7 +82,7 @@ export class UnauthorizedError extends HttpError {
 export class ForbiddenError extends HttpError {
 	constructor(message = "Forbidden", details?: HttpErrorOptions["details"]) {
 		super({
-			statusCode: 403,
+			statusCode: HttpStatus.FORBIDDEN,
 			status: "error",
 			message,
 			details,
@@ -92,7 +93,7 @@ export class ForbiddenError extends HttpError {
 export class NotFoundError extends HttpError {
 	constructor(message = "Not Found", details?: HttpErrorOptions["details"]) {
 		super({
-			statusCode: 404,
+			statusCode: HttpStatus.NOT_FOUND,
 			status: "error",
 			message,
 			details,
@@ -103,7 +104,7 @@ export class NotFoundError extends HttpError {
 export class ConflictError extends HttpError {
 	constructor(message = "Conflict", details?: HttpErrorOptions["details"]) {
 		super({
-			statusCode: 409,
+			statusCode: HttpStatus.CONFLICT,
 			status: "error",
 			message,
 			details,
