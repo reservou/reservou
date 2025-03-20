@@ -1,5 +1,7 @@
 import type { Model, Types } from "mongoose";
-import { Schema, model, models } from "mongoose";
+import { Schema } from "mongoose";
+import { resolveMongooseModel } from "../utils/resolve-mongoose-model";
+import { HOTEL_MODEL_KEY } from "./hotel";
 
 export enum UserRole {
 	HOTEL = "HOTEL",
@@ -35,7 +37,7 @@ const UserSchema: Schema<IUser> = new Schema(
 		},
 		hotel: {
 			type: Schema.Types.ObjectId,
-			ref: "Hotel",
+			ref: HOTEL_MODEL_KEY,
 		},
 	},
 	{
@@ -44,8 +46,8 @@ const UserSchema: Schema<IUser> = new Schema(
 );
 
 export type IUserModel = Model<IUser>;
-
-const collectionName = "users";
-
-export const UserModel: IUserModel =
-	models[collectionName] || model(collectionName, UserSchema);
+export const USER_MODEL_KEY = "users";
+export const UserModel: IUserModel = resolveMongooseModel(
+	USER_MODEL_KEY,
+	UserSchema,
+);
