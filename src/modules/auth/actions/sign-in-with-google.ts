@@ -1,10 +1,10 @@
 "use server";
 
-import { buildAction } from "../../../lib/action";
-import { database } from "../../../lib/database";
-import { BadRequestError } from "../../../lib/errors";
-import { auth } from "../../../lib/firebase/admin";
-import { encryptJwt, setJwtToCookies } from "../../../lib/jwt";
+import { buildAction } from "@/src/lib/action";
+import { database } from "@/src/lib/database";
+import { BadRequestError } from "@/src/lib/errors";
+import { auth } from "@/src/lib/firebase/admin";
+import { encryptJwt, setJwtToCookies } from "@/src/lib/jwt";
 import { UserModel } from "../models/user";
 import type { AccessTokenPayload } from "../types";
 

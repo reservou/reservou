@@ -1,13 +1,13 @@
 "use server";
 
+import { getEnv } from "@/src/env";
+import { buildAction } from "@/src/lib/action";
+import { database } from "@/src/lib/database";
+import { BadRequestError } from "@/src/lib/errors";
+import { mailer } from "@/src/lib/mailer";
+import { redis } from "@/src/lib/redis";
+import { validator } from "@/src/lib/validator";
 import { uid } from "uid";
-import { getEnv } from "../../../env";
-import { buildAction } from "../../../lib/action";
-import { database } from "../../../lib/database";
-import { BadRequestError } from "../../../lib/errors";
-import { mailer } from "../../../lib/mailer";
-import { redis } from "../../../lib/redis";
-import { validator } from "../../../lib/validator";
 import { CONFIRMATION_TOKEN_EXPIRY_IN_MINUTES } from "../constants";
 import { type IUserModel, UserModel } from "../models/user";
 import { type SignInInput, signInSchema } from "../schemas/sign-in-schema";
