@@ -274,7 +274,7 @@ export default function LandingPageEditor() {
 										onChange={(e) => handleChange("slug", e.target.value)}
 									/>
 									<p className="text-xs text-muted-foreground">
-										O slug é usado na URL da sua página. Ex: rezervou.com/
+										O slug é usado na URL da sua página. Ex: reservou.com/
 										{landingPageData.slug.replace("@", "")}
 									</p>
 								</div>

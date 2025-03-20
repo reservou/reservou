@@ -3,7 +3,7 @@
 import { BadRequestError } from "../errors";
 import { buildAction } from "../lib/action";
 import { database } from "../lib/database";
-import { encryptJwt, setJwtToken } from "../lib/jwt";
+import { encryptJwt, setJwtToCookies } from "../lib/jwt";
 import { redis } from "../lib/redis";
 import { UserModel } from "../models/user";
 import type { AccessTokenPayload, SignUpIntent } from "../types";
@@ -47,11 +47,9 @@ export const consumeMagicLink = buildAction(
 		const { id } = await user.save();
 
 		const jwtToken = await encryptJwt({
-			id,
-			email,
-			name: user.name,
+			uid: id,
 		} satisfies AccessTokenPayload);
-		await setJwtToken(jwtToken);
+		await setJwtToCookies(jwtToken);
 
 		return {
 			id,

@@ -4,7 +4,7 @@ import { BadRequestError, InternalServerError } from "../errors";
 import { buildAction } from "../lib/action";
 import { database } from "../lib/database";
 import { auth } from "../lib/firebase/admin";
-import { encryptJwt, setJwtToken } from "../lib/jwt";
+import { encryptJwt, setJwtToCookies } from "../lib/jwt";
 import { UserModel } from "../models/user";
 import type { AccessTokenPayload } from "../types";
 
@@ -56,14 +56,14 @@ export const signUpWithGoogle = buildAction(
 			}
 		}
 
-		const { id } = user;
+		const { id, hotel } = user;
 
 		const jwtToken = await encryptJwt({
-			id,
-			email,
-			name: user.name,
+			uid: id,
+			hid: hotel?._id.toString(),
 		} satisfies AccessTokenPayload);
-		await setJwtToken(jwtToken);
+
+		await setJwtToCookies(jwtToken);
 
 		return {
 			id,

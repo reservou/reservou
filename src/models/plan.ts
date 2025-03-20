@@ -1,0 +1,5 @@
+export enum Plan {
+	BASIC = "BASIC",
+	PROFESSIONAL = "PROFESSIONAL",
+	ENTERPRISE = "ENTERPRISE",
+}

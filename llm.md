@@ -109,7 +109,25 @@ events
 the components, actions, models, lib, are under the @/src folder
 
 ```
+.
 ├── app
+│   ├── (auth)
+│   │   ├── access
+│   │   │   ├── page.tsx
+│   │   │   └── [token]
+│   │   │       └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── sign-in
+│   │   │   └── page.tsx
+│   │   ├── sign-out
+│   │   │   └── route.ts
+│   │   └── sign-up
+│   │       └── page.tsx
+│   ├── dashboard
+│   │   ├── landing-page
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   └── page.tsx
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
@@ -123,23 +141,77 @@ the components, actions, models, lib, are under the @/src folder
 ├── biome.json
 ├── components.json
 ├── docker-compose.yml
+├── docs
+├── llm.md
+├── middleware.ts
+├── next.config.ts
 ├── package.json
 ├── pnpm-lock.yaml
+├── postcss.config.mjs
 ├── public
-│   ├── logo.png
-│   └── ...resources
+│   ├── logo.svg
+│   ├── ... resources
 ├── README.md
+├── secrets
+│   ├── firebase-admin.secret.json
+│   ├── firebase-client.secret.json
+│   └── README.md
 ├── src
 │   ├── actions
+│   │   ├── consume-magic-link.ts
+│   │   ├── get-current-user.ts
+│   │   ├── sign-in-with-google.ts
+│   │   ├── sign-in-with-magic-link.ts
+│   │   ├── sign-up-with-google.ts
+│   │   └── sign-up-with-magic-link.ts
 │   ├── components
-│   │   └── ui // shadcn UI components
+│   │   ├── animations
+│   │   │   └── loading.tsx
+│   │   ├── forms
+│   │   │   ├── sign-in-form.tsx
+│   │   │   └── sign-up-form.tsx
+│   │   ├── headers
+│   │   │   └── mobile-header.tsx
+│   │   ├── navbar
+│   │   ├── providers
+│   │   │   └── theme-provider.tsx
+│   │   ├── sidebar
+│   │   │   ├── desktop-sidebar.tsx
+│   │   │   ├── nav-mobile.tsx
+│   │   │   ├── settings-link.tsx
+│   │   │   └── sign-out-button.tsx
+│   │   └── ui
+│   │       ├── accordion.tsx
+│   │       ├── ... shadcn/ui components
+│   ├── constants
+│   │   ├── auth.ts
+│   │   └── http.ts
+│   ├── env.ts
 │   ├── errors
 │   │   └── index.ts
 │   ├── hooks
+│   │   ├── use-action.ts
+│   │   ├── use-current-user.ts
 │   │   └── use-mobile.ts
 │   ├── lib
+│   │   ├── action.ts
 │   │   ├── controller.ts
-│   │   └── utils.ts
+│   │   ├── database.ts
+│   │   ├── firebase
+│   │   │   ├── admin.ts
+│   │   │   └── client.ts
+│   │   ├── jwt.ts
+│   │   ├── mailer.ts
+│   │   ├── redis.ts
+│   │   ├── utils.ts
+│   │   └── validator.ts
+│   ├── models
+│   │   └── user.ts
+│   ├── schemas
+│   │   ├── sign-in-schema.ts
+│   │   ├── sign-up-schema.ts
+│   │   └── tax-info-schema.ts
+│   └── types.ts
 ```
 
 **Coupling** For the first version, the code will be coupled until the first
