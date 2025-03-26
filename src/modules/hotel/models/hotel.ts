@@ -15,9 +15,9 @@ export interface IHotel {
 		type: "Point";
 		coordinates: [number, number];
 	};
-	address: string;
+	formattedAddress: string;
 	location: {
-		// Individual components for flexibility
+		address: string;
 		city: string;
 		state: string;
 		country: string;
@@ -29,10 +29,10 @@ export interface IHotel {
 		website?: string;
 	};
 	category: string;
-	bannerImage: string;
+	bannerFileKey: string;
 	photos: Array<{
 		id: string;
-		src: string;
+		fileKey: string;
 		alt: string;
 	}>;
 	amenities: string[];
@@ -57,8 +57,9 @@ const HotelSchema: Schema = new Schema({
 			required: true,
 		},
 	},
-	address: { type: String, required: true },
+	formattedAddress: { type: String, required: true },
 	location: {
+		address: { type: String, required: true },
 		city: { type: String, required: true },
 		state: { type: String, required: true },
 		country: { type: String, required: true },
@@ -70,11 +71,11 @@ const HotelSchema: Schema = new Schema({
 		website: { type: String },
 	},
 	category: { type: String, required: true },
-	bannerImage: { type: String, default: "" },
+	bannerFileKey: { type: String, default: "" },
 	photos: [
 		{
 			id: { type: String, required: true },
-			src: { type: String, required: true },
+			fileKey: { type: String, required: true },
 			alt: { type: String, default: "" },
 		},
 	],
