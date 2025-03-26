@@ -1,5 +1,8 @@
 "use client";
 
+import { Loading } from "@/src/components/animations/loading";
+import { LandingPagePreview } from "@/src/components/landing-page-preview";
+import { Photo } from "@/src/components/photo";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,8 +22,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/src/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormMessage,
+} from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
+import { Skeleton } from "@/src/components/ui/skeleton";
 import {
 	Tabs,
 	TabsContent,
@@ -28,620 +39,715 @@ import {
 	TabsTrigger,
 } from "@/src/components/ui/tabs";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useGallery } from "@/src/hooks/use-gallery";
+import { useHotel } from "@/src/hooks/use-hotel";
+import { MAX_PHOTOS_NUM } from "@/src/modules/gallery/constants";
+import { updateBanner } from "@/src/modules/hotel/actions/update-banner";
+import { updateHotelGeneralInfo } from "@/src/modules/hotel/actions/update-general-info";
+import { updateHotelAmenities } from "@/src/modules/hotel/actions/update-hotel-amenities";
+import { updateHotelLocation } from "@/src/modules/hotel/actions/update-location";
+import { MAX_AMENITIES } from "@/src/modules/hotel/constants";
+import { locationSchema } from "@/src/modules/hotel/schemas/hotel-setup-schema";
+import { generalInfoSchema } from "@/src/modules/hotel/schemas/landing-page-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-	ArrowRight,
-	Edit,
-	Eye,
-	ImagePlus,
-	Plus,
-	Save,
-	Trash2,
-	X,
+	CheckIcon,
+	EditIcon,
+	EyeIcon,
+	ImagePlusIcon,
+	PencilIcon,
+	PlusIcon,
+	SaveIcon,
+	TrashIcon,
+	XIcon,
 } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
-
-interface Photo {
-	id: number;
-	src: string;
-	alt: string;
-}
-
-interface LandingPageData {
-	hotelName: string;
-	slug: string;
-	description: string;
-	location: string;
-	bannerImage: string;
-	photos: Photo[];
-	amenities: string[];
-}
-
-const initialLandingPageData: LandingPageData = {
-	hotelName: "Acme Luxury Resort",
-	slug: "@acme-hotel",
-	description:
-		"Experience luxury like never before at our 5-star resort nestled in the heart of paradise. With stunning ocean views, world-class amenities, and exceptional service, Acme Luxury Resort offers the perfect getaway for those seeking relaxation and adventure.",
-	location: "Coastal Paradise, Tropical Island",
-	bannerImage: "/placeholder.svg?height=600&width=1200",
-	photos: [
-		{
-			id: 1,
-			src: "/placeholder.svg?height=600&width=800",
-			alt: "Hotel exterior view with palm trees and ocean in background",
-		},
-		{
-			id: 2,
-			src: "/placeholder.svg?height=600&width=800",
-			alt: "Luxury hotel room with king size bed and ocean view",
-		},
-		{
-			id: 3,
-			src: "/placeholder.svg?height=600&width=800",
-			alt: "Hotel swimming pool surrounded by lounge chairs",
-		},
-		{
-			id: 4,
-			src: "/placeholder.svg?height=600&width=800",
-			alt: "Hotel restaurant with elegant dining setup",
-		},
-	],
-	amenities: ["Free WiFi", "Pool", "Spa", "Restaurant", "Gym", "Beach Access"],
-};
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { GeneralInfo, LocationInfo } from "./types";
 
 export default function LandingPageEditor() {
-	const [landingPageData, setLandingPageData] = useState<LandingPageData>(
-		initialLandingPageData,
-	);
-	const [newAmenity, setNewAmenity] = useState<string>("");
-	const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
-	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const [previewMode, setPreviewMode] = useState<boolean>(false);
+	const [hasEditedGeneralInfo, setHasEditedGeneralInfo] = React.useState(false);
+	const [hasEditedLocationInfo, setHasEditedLocationInfo] =
+		React.useState(false);
+	const [hasEditedAmenities, setHasEditedAmenities] = React.useState(false);
+	const [hasEditedBanner, setHasEditedBanner] = React.useState(false);
+	const [previewMode, setPreviewMode] = React.useState(false);
+	const [generalInfo, setGeneralInfo] = React.useState<GeneralInfo>({
+		name: "",
+		description: "",
+		slug: "",
+	});
+	const [locationInfo, setLocationInfo] = React.useState<LocationInfo>({
+		address: "",
+		city: "",
+		state: "",
+		country: "",
+		zipCode: "",
+	});
+	const [amenities, setAmenities] = React.useState<string[]>([]);
+	const [newAmenity, setNewAmenity] = React.useState("");
+	const [isSaved, setIsSaved] = React.useState(false);
+	const [isSaving, setIsSaving] = React.useState(false);
+	const [banner, setBanner] = React.useState<{
+		url: string;
+		file: File | null;
+	}>({
+		file: null,
+		url: "/placeholder.svg",
+	});
+	const {
+		photos,
+		canUpload,
+		handleAddPhoto,
+		handleDeletePhoto,
+		handleEditPhoto,
+		handleSave: handleSaveGallery,
+		isLoading,
+		isSaved: hasSavedGallery,
+		isSaving: isSavingGallery,
+		hasChanged: hasEditedGallery,
+	} = useGallery();
+	const { error, hotel, loading } = useHotel();
 
-	const handleChange = (field: keyof LandingPageData, value: string) => {
-		setLandingPageData({
-			...landingPageData,
-			[field]: value,
-		});
-	};
-
-	const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files?.[0]) {
-			setLandingPageData({
-				...landingPageData,
-				bannerImage: URL.createObjectURL(e.target.files[0]),
+	React.useEffect(() => {
+		if (hotel) {
+			setGeneralInfo({
+				description: hotel.description,
+				name: hotel.name,
+				slug: hotel.slug,
 			});
+
+			setLocationInfo({
+				address: hotel.formattedAddress,
+				city: hotel.location.city,
+				state: hotel.location.state,
+				country: hotel.location.country,
+				zipCode: hotel.location.zipCode,
+			});
+
+			setBanner({
+				file: null,
+				url: hotel.bannerUrl,
+			});
+
+			setAmenities(hotel.amenities);
 		}
-	};
+	}, [hotel]);
 
-	const handlePhotoEdit = (photo: Photo) => {
-		setEditingPhoto(photo);
-	};
+	const generalInfoForm = useForm({
+		resolver: zodResolver(generalInfoSchema),
+		values: generalInfo,
+	});
 
-	const handlePhotoUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file =
-			e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+	const locationForm = useForm({
+		resolver: zodResolver(locationSchema),
+		values: {
+			address: locationInfo.address,
+			city: locationInfo.city,
+			state: locationInfo.state,
+			country: locationInfo.country,
+			zipCode: locationInfo.zipCode ?? "",
+		},
+	});
 
-		if (!file || !editingPhoto) {
-			setEditingPhoto(null);
+	const handleSaveAmenitites = async () => {
+		const output = await updateHotelAmenities(amenities);
+
+		if (output.success) {
+			setHasEditedAmenities(false);
 			return;
 		}
 
-		const objectUrl = URL.createObjectURL(file);
-
-		setLandingPageData({
-			...landingPageData,
-			photos: landingPageData.photos.map((photo) =>
-				photo.id === editingPhoto.id ? { ...photo, src: objectUrl } : photo,
-			),
-		});
-
-		setEditingPhoto(null);
+		toast.error(output.message);
 	};
 
-	const handlePhotoDelete = (id: number) => {
-		setLandingPageData({
-			...landingPageData,
-			photos: landingPageData.photos.filter((photo) => photo.id !== id),
-		});
-	};
-
-	const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file =
-			e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
-
-		if (!file) {
-			return;
+	const handleChangeBanner = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			const url = URL.createObjectURL(file);
+			setBanner({
+				url,
+				file,
+			});
+			setHasEditedBanner(true);
 		}
+	};
 
-		const newId = Math.max(...landingPageData.photos.map((p) => p.id)) + 1;
-		setLandingPageData({
-			...landingPageData,
-			photos: [
-				...landingPageData.photos,
-				{
-					id: newId,
-					src: URL.createObjectURL(file),
-					alt: `New photo ${newId}`,
-				},
-			],
-		});
+	const handleSaveBanner = async () => {
+		if (banner.file) {
+			const output = await updateBanner(banner.file);
+			if (output.success) {
+				return setHasEditedBanner(false);
+			}
+
+			toast.error(output.message);
+		}
 	};
 
 	const handleAddAmenity = () => {
-		if (
-			newAmenity.trim() &&
-			!landingPageData.amenities.includes(newAmenity.trim())
-		) {
-			setLandingPageData({
-				...landingPageData,
-				amenities: [...landingPageData.amenities, newAmenity.trim()],
-			});
-			setNewAmenity("");
+		const currentAmenities = new Set(amenities);
+		if (newAmenity === "") {
+			return;
 		}
+
+		if (currentAmenities.size >= MAX_AMENITIES) {
+			return toast.error(
+				`Vocẽ só pode adicionar até ${MAX_AMENITIES} comodidades`,
+			);
+		}
+		currentAmenities.add(newAmenity);
+
+		setAmenities([...currentAmenities]);
+		setNewAmenity("");
+		setHasEditedAmenities(true);
 	};
 
-	const handleRemoveAmenity = (amenity: string) => {
-		setLandingPageData({
-			...landingPageData,
-			amenities: landingPageData.amenities.filter((a) => a !== amenity),
-		});
+	const handleRemoveAmenity = (amenityToDelete: string) => {
+		setAmenities([
+			...amenities.filter((amenity) => amenity !== amenityToDelete),
+		]);
+		setHasEditedAmenities(true);
 	};
 
-	const handleSave = () => {
+	const handleSaveGeneralInfo = async () => {
+		const output = await updateHotelGeneralInfo(generalInfoForm.getValues());
+		if (output.success) {
+			toast.success("Informações gerais salvas com sucesso");
+			setIsSaved(true);
+			setHasEditedGeneralInfo(false);
+			setTimeout(() => setIsSaved(false), 3000);
+			return;
+		}
+
+		toast.error(output.message);
+	};
+
+	const handleSaveLocationInfo = async () => {
+		const output = await updateHotelLocation(locationForm.getValues());
+		if (output.success) {
+			toast.success("Localização atualizada com sucesso");
+			setIsSaved(true);
+			setHasEditedLocationInfo(false);
+			setTimeout(() => setIsSaved(false), 3000);
+			return;
+		}
+
+		toast.error(output.message);
+	};
+
+	async function handleSave() {
 		setIsSaving(true);
-		setTimeout(() => {
+		const [generalInfoIsValid, locationInfoIsValid] = await Promise.all([
+			generalInfoForm.trigger(),
+			locationForm.trigger(),
+		]);
+
+		if (!generalInfoIsValid || !locationInfoIsValid) {
 			setIsSaving(false);
-			alert("Alterações salvas com sucesso!");
-		}, 1500);
+			return;
+		}
+
+		const promises = [];
+
+		if (hasEditedGeneralInfo) {
+			promises.push(handleSaveGeneralInfo());
+		}
+
+		if (hasEditedLocationInfo) {
+			promises.push(handleSaveLocationInfo());
+		}
+
+		if (hasEditedGallery) {
+			promises.push(handleSaveGallery());
+		}
+
+		if (hasEditedAmenities) {
+			promises.push(handleSaveAmenitites());
+		}
+
+		if (hasEditedBanner) {
+			promises.push(handleSaveBanner());
+		}
+
+		await Promise.all(promises);
+		setIsSaving(false);
+	}
+
+	const PreviewToggle = () => {
+		if (previewMode) {
+			return (
+				<Button variant={"outline"} onClick={() => setPreviewMode(false)}>
+					<EditIcon />
+					<span>Voltar para edição</span>
+				</Button>
+			);
+		}
+
+		return (
+			<Button variant={"outline"} onClick={() => setPreviewMode(true)}>
+				<EyeIcon />
+				<span>Visualizar página</span>
+			</Button>
+		);
 	};
+
+	const SaveButton = () => {
+		const canSave =
+			hasEditedGeneralInfo ||
+			hasEditedLocationInfo ||
+			hasEditedBanner ||
+			hasEditedGallery ||
+			hasEditedAmenities;
+
+		return isSaving || isSavingGallery ? (
+			<Button disabled variant="outline">
+				<Loading /> Salvando...
+			</Button>
+		) : isSaved || hasSavedGallery ? (
+			<Button variant="outline" disabled>
+				<CheckIcon className="w-5 h-5 mr-2" /> Salvo
+			</Button>
+		) : (
+			<Button disabled={!canSave} variant="default" onClick={handleSave}>
+				<SaveIcon className="w-5 h-5 mr-2" /> Salvar alterações
+			</Button>
+		);
+	};
+
+	if (loading) {
+		return <Skeleton className="w-full h-full rounded" />;
+	}
+
+	if (error) {
+		return <p className="text-destructive-foreground">{error}</p>;
+	}
+
+	if (!hotel) {
+		return (
+			<p className="text-destructive-foreground">
+				Não foi possível encontrar o hotel
+			</p>
+		);
+	}
 
 	return (
-		<div className="flex flex-col gap-6">
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-				<div>
-					<h1 className="text-2xl font-bold">Landing Page</h1>
+		<section className="space-y-4">
+			<header className="flex flex-col sm:flex-row gap-4 justify-between">
+				<section className="flex flex-col sm:gap-2">
+					<h1 className="text-2xl text-foreground font-semibold">
+						Customize sua página inicial
+					</h1>
 					<p className="text-muted-foreground">
-						Personalize a página inicial do seu hotel
+						Esse será o primeiro contato com o cliente!
 					</p>
-				</div>
+				</section>
+				<section className="flex sm:flex-row flex-col gap-2">
+					<PreviewToggle />
+					<SaveButton />
+				</section>
+			</header>
 
-				<div className="flex flex-col sm:flex-row gap-2">
-					<Button
-						variant="outline"
-						onClick={() => setPreviewMode(!previewMode)}
-					>
-						{previewMode ? (
-							<>
-								<Edit className="mr-2 h-4 w-4" />
-								Editar
-							</>
-						) : (
-							<>
-								<Eye className="mr-2 h-4 w-4" />
-								Visualizar
-							</>
-						)}
-					</Button>
+			<main>
+				{previewMode ? (
+					<LandingPagePreview
+						amenities={amenities}
+						gallery={photos}
+						generalInfo={generalInfo}
+						locationInfo={locationInfo}
+						banner={banner}
+					/>
+				) : (
+					<Tabs defaultValue={"general"}>
+						<TabsList>
+							<TabsTrigger key={"general-tab-trigger"} value={"general"}>
+								Informações Gerais
+							</TabsTrigger>
+							<TabsTrigger key={"location-tab-trigger"} value={"location"}>
+								Localização
+							</TabsTrigger>
+							<TabsTrigger key={"gallery-tab-trigger"} value={"gallery"}>
+								Fotos
+							</TabsTrigger>
+						</TabsList>
 
-					<Button onClick={handleSave} disabled={isSaving}>
-						{isSaving ? (
-							"Salvando..."
-						) : (
-							<>
-								<Save className="mr-2 h-4 w-4" />
-								Salvar Alterações
-							</>
-						)}
-					</Button>
-				</div>
-			</div>
-
-			{previewMode ? (
-				<PreviewMode data={landingPageData} />
-			) : (
-				<Tabs defaultValue="general">
-					<TabsList className="mb-4">
-						<TabsTrigger value="general">Informações Gerais</TabsTrigger>
-						<TabsTrigger value="photos">Fotos</TabsTrigger>
-						<TabsTrigger value="amenities">Comodidades</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="general" className="space-y-4">
-						<Card>
-							<CardHeader>
-								<CardTitle>Informações do Hotel</CardTitle>
-								<CardDescription>
-									Edite as informações básicas que serão exibidas na página
-									inicial.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="grid gap-2">
-									<Label htmlFor="hotelName">Nome do Hotel</Label>
-									<Input
-										id="hotelName"
-										value={landingPageData.hotelName}
-										onChange={(e) => handleChange("hotelName", e.target.value)}
-									/>
-								</div>
-
-								<div className="grid gap-2">
-									<Label htmlFor="slug">Slug</Label>
-									<Input
-										id="slug"
-										value={landingPageData.slug}
-										onChange={(e) => handleChange("slug", e.target.value)}
-									/>
-									<p className="text-xs text-muted-foreground">
-										O slug é usado na URL da sua página. Ex: reservou.com/
-										{landingPageData.slug.replace("@", "")}
-									</p>
-								</div>
-
-								<div className="grid gap-2">
-									<Label htmlFor="location">Localização</Label>
-									<Input
-										id="location"
-										value={landingPageData.location}
-										onChange={(e) => handleChange("location", e.target.value)}
-									/>
-								</div>
-
-								<div className="grid gap-2">
-									<Label htmlFor="description">Descrição</Label>
-									<Textarea
-										id="description"
-										rows={5}
-										value={landingPageData.description}
-										onChange={(e) =>
-											handleChange("description", e.target.value)
-										}
-									/>
-									<p className="text-xs text-muted-foreground">
-										Uma descrição atraente do seu hotel que será exibida na
-										página inicial.
-									</p>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle>Banner Principal</CardTitle>
-								<CardDescription>
-									Adicione uma imagem de destaque para a parte superior da sua
-									página.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="relative aspect-[2/1] overflow-hidden rounded-md mb-4">
-									<img
-										src={landingPageData.bannerImage || "/placeholder.svg"}
-										alt="Banner"
-										className="object-cover w-full h-full"
-									/>
-								</div>
-
-								<div className="flex items-center gap-2">
-									<Label htmlFor="banner-upload" className="cursor-pointer">
-										<div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-md hover:bg-primary/20 transition-colors">
-											<ImagePlus className="h-4 w-4" />
-											<span>Alterar Banner</span>
-										</div>
-										<Input
-											id="banner-upload"
-											type="file"
-											accept="image/*"
-											className="hidden"
-											onChange={handleBannerChange}
-										/>
-									</Label>
-									<p className="text-xs text-muted-foreground">
-										Recomendado: 1200 x 600 pixels
-									</p>
-								</div>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
-					<TabsContent value="photos" className="space-y-4">
-						<Card>
-							<CardHeader>
-								<CardTitle>Galeria de Fotos</CardTitle>
-								<CardDescription>
-									Adicione fotos do seu hotel para exibir na página inicial.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-									{landingPageData.photos.map((photo) => (
-										<div key={photo.id} className="relative group">
-											<div className="relative aspect-[4/3] overflow-hidden rounded-md">
-												<img
-													src={photo.src || "/placeholder.svg"}
-													alt={photo.alt}
-													className="object-cover w-full h-full"
-												/>
-											</div>
-											<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-md">
-												<Label
-													htmlFor={`photo-edit-${photo.id}`}
-													className="cursor-pointer"
-												>
-													<div className="bg-white text-black p-2 rounded-full hover:bg-gray-200 transition-colors">
-														<Edit className="h-4 w-4" />
-													</div>
-													<Input
-														id={`photo-edit-${photo.id}`}
-														type="file"
-														accept="image/*"
-														className="hidden"
-														onChange={handlePhotoUpdate}
-														onClick={() => handlePhotoEdit(photo)}
-													/>
-												</Label>
-
-												<AlertDialog>
-													<AlertDialogTrigger asChild>
-														<Button
-															variant="destructive"
-															size="icon"
-															className="rounded-full h-8 w-8 p-0"
-														>
-															<Trash2 className="h-4 w-4" />
-														</Button>
-													</AlertDialogTrigger>
-													<AlertDialogContent>
-														<AlertDialogHeader>
-															<AlertDialogTitle>Excluir Foto</AlertDialogTitle>
-															<AlertDialogDescription>
-																Tem certeza que deseja excluir esta foto? Esta
-																ação não pode ser desfeita.
-															</AlertDialogDescription>
-														</AlertDialogHeader>
-														<AlertDialogFooter>
-															<AlertDialogCancel>Cancelar</AlertDialogCancel>
-															<AlertDialogAction
-																onClick={() => handlePhotoDelete(photo.id)}
-															>
-																Excluir
-															</AlertDialogAction>
-														</AlertDialogFooter>
-													</AlertDialogContent>
-												</AlertDialog>
-											</div>
-
-											<div className="mt-2">
-												<Input
-													value={photo.alt}
-													onChange={(e) => {
-														setLandingPageData({
-															...landingPageData,
-															photos: landingPageData.photos.map((p) =>
-																p.id === photo.id
-																	? { ...p, alt: e.target.value }
-																	: p,
-															),
-														});
-													}}
-													placeholder="Descrição da imagem"
-													className="text-sm"
-												/>
-											</div>
-										</div>
-									))}
-
-									<Label htmlFor="add-photo" className="cursor-pointer">
-										<div className="border-2 border-dashed border-muted-foreground/25 rounded-md aspect-[4/3] flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors">
-											<ImagePlus className="h-8 w-8 text-muted-foreground" />
-											<span className="text-sm text-muted-foreground">
-												Adicionar Foto
-											</span>
-										</div>
-										<Input
-											id="add-photo"
-											type="file"
-											accept="image/*"
-											className="hidden"
-											onChange={handleAddPhoto}
-										/>
-									</Label>
-								</div>
-
-								<p className="text-sm text-muted-foreground">
-									Recomendado: Imagens de 800 x 600 pixels. Adicione fotos de
-									alta qualidade que mostrem o melhor do seu hotel.
-								</p>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
-					<TabsContent value="amenities" className="space-y-4">
-						<Card>
-							<CardHeader>
-								<CardTitle>Comodidades</CardTitle>
-								<CardDescription>
-									Adicione as comodidades que seu hotel oferece.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="flex flex-wrap gap-2 mb-4">
-									{landingPageData.amenities.map((amenity) => (
-										<div
-											key={amenity}
-											className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full"
-										>
-											<span>{amenity}</span>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-5 w-5 rounded-full p-0 hover:bg-destructive/10 hover:text-destructive"
-												onClick={() => handleRemoveAmenity(amenity)}
-											>
-												<X className="h-3 w-3" />
-											</Button>
-										</div>
-									))}
-								</div>
-
-								<div className="flex gap-2">
-									<Input
-										placeholder="Nova comodidade"
-										value={newAmenity}
-										onChange={(e) => setNewAmenity(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") {
-												e.preventDefault();
-												handleAddAmenity();
+						<TabsContent className="space-y-4" value={"general"}>
+							<Card>
+								<CardHeader>
+									<CardTitle>Informações Gerais</CardTitle>
+									<CardDescription>
+										Adicione informações gerais sobre o seu hotel, como nome,
+										descrição e localização.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<Form {...generalInfoForm}>
+										<form
+											className="space-y-4"
+											onChange={() =>
+												!hasEditedGeneralInfo && setHasEditedGeneralInfo(true)
 											}
+										>
+											<FormField
+												control={generalInfoForm.control}
+												name="name"
+												render={({ field }) => {
+													return (
+														<FormItem>
+															<Label htmlFor="name">Nome do hotel</Label>
+															<FormControl>
+																<Input id="name" {...field} />
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													);
+												}}
+											/>
+
+											<FormField
+												control={generalInfoForm.control}
+												name="slug"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="slug">Slug</Label>
+														<FormControl>
+															<Input id="slug" {...field} />
+														</FormControl>
+														<p className="text-xs text-muted-foreground">
+															O slug é usado na URL da sua página. Ex:
+															reservou.com/
+															{generalInfo.slug.replace("@", "")}
+														</p>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={generalInfoForm.control}
+												name="description"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="description">Descrição</Label>
+														<FormControl>
+															<Textarea id="description" rows={5} {...field} />
+														</FormControl>
+														<p className="text-xs text-muted-foreground">
+															Uma descrição atraente do seu hotel que será
+															exibida na página inicial.
+														</p>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</form>
+									</Form>
+								</CardContent>
+							</Card>
+
+							<Card>
+								<CardHeader>
+									<CardTitle>Comodidades</CardTitle>
+									<CardDescription>
+										Adicione as comodidades que seu hotel oferece.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<div className="flex flex-wrap gap-2 mb-4">
+										{amenities.length === 0 ? (
+											<p className="text-xs text-muted-foreground">
+												Parece que você não tem comodidades registradas ainda
+											</p>
+										) : (
+											amenities.map((amenity) => (
+												<div
+													key={amenity}
+													className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full"
+												>
+													<span>{amenity}</span>
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-5 w-5 rounded-full p-0 hover:bg-destructive/10 hover:text-destructive"
+														onClick={() => handleRemoveAmenity(amenity)}
+													>
+														<XIcon className="h-3 w-3" />
+													</Button>
+												</div>
+											))
+										)}
+									</div>
+
+									<div className="flex gap-2">
+										<Input
+											placeholder="Nova comodidade"
+											value={newAmenity}
+											onChange={(e) => setNewAmenity(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													handleAddAmenity();
+												}
+											}}
+										/>
+										<Button onClick={handleAddAmenity}>
+											<PlusIcon className="h-4 w-4" />
+										</Button>
+									</div>
+
+									<p className="text-sm text-muted-foreground mt-4">
+										Adicione comodidades como Wi-Fi, piscina, academia,
+										restaurante, etc. Estas comodidades serão exibidas na página
+										inicial do seu hotel.
+									</p>
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						<TabsContent value={"location"}>
+							<Card>
+								<CardHeader>
+									<CardTitle> Localização</CardTitle>
+									<CardDescription>
+										Adicione a localização do seu hotel.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<Form {...locationForm}>
+										<form
+											onChange={() => setHasEditedLocationInfo(true)}
+											className="space-y-4"
+										>
+											<FormField
+												control={locationForm.control}
+												name="address"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="address">Endereço</Label>
+														<FormControl>
+															<Input id="address" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={locationForm.control}
+												name="city"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="city">Cidade</Label>
+														<FormControl>
+															<Input id="city" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={locationForm.control}
+												name="state"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="state">Estado</Label>
+														<FormControl>
+															<Input id="state" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={locationForm.control}
+												name="country"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="country">País</Label>
+														<FormControl>
+															<Input id="country" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={locationForm.control}
+												name="zipCode"
+												render={({ field }) => (
+													<FormItem>
+														<Label htmlFor="zipCode">CEP</Label>
+														<FormControl>
+															<Input id="zipCode" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</form>
+									</Form>
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						<TabsContent className="space-y-4" value={"gallery"}>
+							<Card>
+								<CardHeader>
+									<CardTitle>Banner Principal</CardTitle>
+									<CardDescription>
+										Adicione uma imagem de destaque para a parte superior da sua
+										página.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<Photo
+										className="aspect-[2/1] mb-4"
+										photo={{
+											alt: `${hotel.name}'s banner`,
+											url: banner.url,
 										}}
 									/>
-									<Button onClick={handleAddAmenity}>
-										<Plus className="h-4 w-4" />
-									</Button>
-								</div>
 
-								<p className="text-sm text-muted-foreground mt-4">
-									Adicione comodidades como Wi-Fi, piscina, academia,
-									restaurante, etc. Estas comodidades serão exibidas na página
-									inicial do seu hotel.
-								</p>
-							</CardContent>
-						</Card>
-					</TabsContent>
-				</Tabs>
-			)}
-		</div>
-	);
-}
-
-function PreviewMode({ data }: { data: LandingPageData }) {
-	return (
-		<div className="border rounded-lg overflow-hidden">
-			<div className="p-4 bg-muted flex items-center justify-between">
-				<p className="text-sm font-medium">Visualização da Página Inicial</p>
-				<Button variant="outline" size="sm" asChild>
-					<a href="/" target="_blank" rel="noopener noreferrer">
-						Abrir em Nova Aba
-						<ArrowRight className="ml-2 h-4 w-4" />
-					</a>
-				</Button>
-			</div>
-
-			<div className="p-6 bg-background">
-				<div className="max-w-5xl mx-auto">
-					<div className="relative aspect-[2/1] overflow-hidden rounded-lg mb-6">
-						<img
-							src={data.bannerImage || "/placeholder.svg"}
-							alt="Banner"
-							className="object-cover w-full h-full"
-						/>
-					</div>
-
-					<div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-						<div className="flex items-center justify-center bg-primary/10 rounded-full p-3">
-							<svg
-								className="h-8 w-8 text-primary"
-								viewBox="0 0 24 24"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"
-									fill="currentColor"
-								/>
-							</svg>
-						</div>
-						<div className="space-y-1">
-							<div className="flex flex-col md:flex-row md:items-center gap-2">
-								<h1 className="text-2xl md:text-3xl font-bold">
-									{data.hotelName}
-								</h1>
-								<div className="px-2 py-0.5 border rounded-full text-sm text-muted-foreground w-fit">
-									{data.slug}
-								</div>
-							</div>
-							<div className="flex items-center gap-2 text-muted-foreground">
-								<svg
-									className="h-4 w-4"
-									viewBox="0 0 24 24"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-										fill="currentColor"
-									/>
-								</svg>
-								<span className="text-sm">{data.location}</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="space-y-6 mb-6">
-						<div>
-							<h2 className="text-xl font-semibold mb-2">Sobre</h2>
-							<p className="text-muted-foreground">{data.description}</p>
-						</div>
-
-						<div>
-							<h2 className="text-xl font-semibold mb-3">Comodidades</h2>
-							<div className="flex flex-wrap gap-2">
-								{data.amenities.map((amenity) => (
-									<div
-										key={amenity}
-										className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm"
-									>
-										{amenity}
+									<div className="flex items-center gap-2">
+										<Label htmlFor="banner-upload" className="cursor-pointer">
+											<div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-md hover:bg-primary/20 transition-colors">
+												<ImagePlusIcon className="h-4 w-4" />
+												<span>Alterar Banner</span>
+											</div>
+											<Input
+												id="banner-upload"
+												type="file"
+												accept="image/*"
+												className="hidden"
+												onChange={handleChangeBanner}
+											/>
+										</Label>
+										<p className="text-xs text-muted-foreground">
+											Recomendado: 1200 x 600 pixels
+										</p>
 									</div>
-								))}
-							</div>
-						</div>
+								</CardContent>
+							</Card>
 
-						<div>
-							<h2 className="text-xl font-semibold mb-3">Fotos</h2>
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-								{data.photos.map((photo) => (
-									<div
-										key={photo.id}
-										className="relative aspect-[4/3] overflow-hidden rounded-lg"
-									>
-										<img
-											src={photo.src || "/placeholder.svg"}
-											alt={photo.alt}
-											className="object-cover w-full h-full"
-										/>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
+							<Card>
+								<CardHeader>
+									<CardTitle>Fotos</CardTitle>
+									<CardDescription>
+										Adicione fotos do seu hotel para exibir na página inicial.
+									</CardDescription>
+								</CardHeader>
 
-					<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
-						<div className="text-center sm:text-left">
-							<p className="text-sm text-muted-foreground">
-								Ready to experience luxury?
-							</p>
-							<p className="font-semibold">Book your stay now!</p>
-						</div>
-						<Button className="w-full sm:w-auto gap-2">
-							<svg
-								className="h-4 w-4"
-								viewBox="0 0 24 24"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"
-									fill="currentColor"
-								/>
-							</svg>
-							Reserve Now
-						</Button>
-					</div>
-				</div>
-			</div>
-		</div>
+								<CardContent>
+									<section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+										{isLoading
+											? Array.from({ length: MAX_PHOTOS_NUM }).map(
+													(_, index) => (
+														<Skeleton
+															// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+															key={index}
+															className="aspect-[4/3] rounded-md"
+														/>
+													),
+												)
+											: [
+													...photos.filter(
+														(photo) =>
+															!photo.fromServer ||
+															(photo.fromServer && !photo.hasBeenDeleted),
+													),
+												].map((photo, index) => (
+													<figure
+														// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+														key={index}
+														className="relative group"
+													>
+														<Photo photo={photo} />
+														<figcaption className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-md">
+															<Label
+																htmlFor={`photo-edit-${index}`}
+																className="cursor-pointer"
+															>
+																<div className="bg-white text-black p-2 rounded-full hover:bg-gray-200 transition-colors">
+																	<PencilIcon className="h-4 w-4" />
+																</div>
+																<Input
+																	id={`photo-edit-${index}`}
+																	type="file"
+																	accept="image/*"
+																	className="hidden"
+																	onChange={(e) => handleEditPhoto(photo.id, e)}
+																/>
+															</Label>
+															<AlertDialog>
+																<AlertDialogTrigger asChild>
+																	<Button
+																		variant="destructive"
+																		size="icon"
+																		className="rounded-full h-8 w-8 p-0"
+																	>
+																		<TrashIcon className="h-4 w-4" />
+																	</Button>
+																</AlertDialogTrigger>
+																<AlertDialogContent>
+																	<AlertDialogHeader>
+																		<AlertDialogTitle>
+																			Excluir Foto
+																		</AlertDialogTitle>
+																		<AlertDialogDescription>
+																			Tem certeza que deseja excluir esta foto?
+																			Esta ação não pode ser desfeita.
+																		</AlertDialogDescription>
+																	</AlertDialogHeader>
+																	<AlertDialogFooter>
+																		<AlertDialogCancel>
+																			Cancelar
+																		</AlertDialogCancel>
+																		<AlertDialogAction
+																			onClick={() =>
+																				handleDeletePhoto(photo.id)
+																			}
+																		>
+																			Excluir
+																		</AlertDialogAction>
+																	</AlertDialogFooter>
+																</AlertDialogContent>
+															</AlertDialog>
+														</figcaption>
+													</figure>
+												))}
+										{canUpload && (
+											<Label
+												htmlFor="add-photo"
+												className="cursor-pointer border-2 border-dashed border-muted-foreground/25 rounded-md aspect-[4/3] flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors"
+											>
+												<ImagePlusIcon className="h-8 w-8 text-muted-foreground" />
+												<span className="text-sm text-muted-foreground">
+													Adicionar Foto
+												</span>
+												<Input
+													id="add-photo"
+													type="file"
+													accept="image/*"
+													className="hidden"
+													onChange={handleAddPhoto}
+												/>
+											</Label>
+										)}
+									</section>
+
+									<p className="text-sm text-muted-foreground">
+										Recomendado: Imagens de 800 x 600 pixels. Adicione fotos de
+										alta qualidade que mostrem o melhor do seu hotel.
+									</p>
+								</CardContent>
+							</Card>
+						</TabsContent>
+					</Tabs>
+				)}
+			</main>
+		</section>
 	);
 }
