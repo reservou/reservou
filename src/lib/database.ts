@@ -5,7 +5,14 @@
  * https://github.com/vercel/next.js/blob/canary/examples/with-mongodb-mongoose/lib/dbConnect.ts
  */
 
-import mongoose, { type Mongoose, connect as connectMongoose } from "mongoose";
+import {
+	type Model,
+	type Mongoose,
+	type Schema,
+	connect as connectMongoose,
+	models,
+	model,
+} from "mongoose";
 import { getEnv } from "../env";
 import { InternalServerError } from "./errors";
 
@@ -56,17 +63,14 @@ async function connect(): Promise<Mongoose> {
 	return cached.conn;
 }
 
-export function resolveMongooseModel<T>(
-	key: string,
-	schema: mongoose.Schema,
-): mongoose.Model<T> {
-	const storedModel = mongoose.models && mongoose.models[key];
+export function resolveMongooseModel<T>(key: string, schema: Schema): Model<T> {
+	const storedModel = models && models[key];
 
 	if (storedModel) {
 		return storedModel;
 	}
 
-	return mongoose.model<T>(key, schema);
+	return model<T>(key, schema);
 }
 
 export const database = Object.freeze({
