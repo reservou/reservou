@@ -26,7 +26,7 @@ export const signUpWithGoogle = buildAction(
 			email = decodedIdToken.email;
 		} catch (error) {
 			if (error instanceof InternalServerError) {
-				console.log();
+				console.error(error);
 			}
 			throw new BadRequestError("Token de autenticação inválido ou expirado.");
 		}
