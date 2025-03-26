@@ -1,10 +1,10 @@
 "use server";
 
-import { buildAction } from "../../../lib/action";
-import { database } from "../../../lib/database";
-import { BadRequestError } from "../../../lib/errors";
-import { encryptJwt, setJwtToCookies } from "../../../lib/jwt";
-import { redis } from "../../../lib/redis";
+import { buildAction } from "@/src/lib/action";
+import { database } from "@/src/lib/database";
+import { BadRequestError } from "@/src/lib/errors";
+import { encryptJwt, setJwtToCookies } from "@/src/lib/jwt";
+import { redis } from "@/src/lib/redis";
 import { UserModel } from "../models/user";
 import type { AccessTokenPayload, SignUpIntent } from "../types";
 
