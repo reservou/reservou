@@ -37,10 +37,13 @@ export const locationSchema = z.object({
 	}),
 	zipCode: z
 		.string()
-		.min(5, {
-			message: "O CEP deve ter pelo menos 5 caracteres",
+		.regex(/^\d{5}-?\d{3}$/, {
+			message: "Informe um CEP válido.",
 		})
-		.optional(),
+		.transform((val) => val.replace("-", ""))
+		.refine((val) => val.length === 8, {
+			message: "CEP inválido",
+		}),
 });
 
 export const contactSchema = z.object({

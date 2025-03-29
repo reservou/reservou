@@ -1,29 +1,70 @@
-import type {
-	GeneralInfo,
-	LocationInfo,
-} from "@/app/dashboard/landing-page/types";
-import { ArrowRightIcon } from "lucide-react";
-import type { Photo as IPhoto } from "../modules/gallery/types";
-import { Photo } from "./photo";
-import { Button } from "./ui/button";
+"use client";
 
-export type LandingPagePreviewData = {
-	generalInfo: GeneralInfo;
+import { Button } from "@/src/components/ui/button";
+import type { Media } from "@/src/modules/gallery/upload-photo";
+import type { LocationFormValues } from "@/src/modules/hotel/schemas/landing-page-schema";
+import { ArrowRightIcon } from "lucide-react";
+import React from "react";
+import { AnimatedImage } from "./animated-image";
+
+export type LandingPageFormValues = {
+	banner: Media;
+	slug: string;
+	description: string;
+	name: string;
+	location: LocationFormValues;
 	amenities: string[];
-	locationInfo: LocationInfo;
-	gallery: IPhoto[];
-	banner: {
-		url: string;
-	};
+	photos: Media[];
+};
+
+export type LandingPagePreviewProps = {
+	getCurrentValues: () => LandingPageFormValues;
+	previewMode: boolean;
 };
 
 export function LandingPagePreview({
-	gallery,
-	amenities,
-	generalInfo,
-	locationInfo,
-	banner,
-}: LandingPagePreviewData) {
+	getCurrentValues,
+	previewMode,
+}: LandingPagePreviewProps) {
+	const [currentValues, setCurrentValues] =
+		React.useState<LandingPageFormValues>({
+			amenities: [],
+			slug: "",
+			banner: {
+				alt: "Mocked banner",
+				fileKey: "placeholder",
+				url: "/placeholder.svg",
+			},
+			description: "",
+			location: { address: "", city: "", country: "", state: "", zipCode: "" },
+			name: "",
+			photos: [],
+		});
+
+	React.useEffect(() => {
+		if (previewMode) {
+			const values = getCurrentValues();
+			setCurrentValues(values);
+		}
+	}, [previewMode, getCurrentValues]);
+
+	if (!previewMode) return null;
+
+	// Map current values to previous structure
+	const generalInfo = {
+		name: currentValues.name,
+		slug: currentValues.slug,
+		description: currentValues.description,
+	};
+	const locationInfo = currentValues.location;
+	const amenities = currentValues.amenities;
+	const gallery = currentValues.photos.map((photo) => ({
+		id: photo.fileKey, // Use fileKey as a fallback for id
+		url: photo.url,
+		alt: photo.alt,
+	}));
+	const banner = { url: currentValues.banner.url };
+
 	return (
 		<div className="border rounded-lg overflow-hidden">
 			<div className="p-4 bg-muted flex items-center justify-between">
@@ -38,12 +79,10 @@ export function LandingPagePreview({
 
 			<div className="p-6 bg-background">
 				<div className="max-w-5xl mx-auto">
-					<Photo
+					<AnimatedImage
 						className="aspect-[2/1] mb-8"
-						photo={{
-							alt: `${generalInfo.name}'s banner`,
-							url: banner.url,
-						}}
+						alt={`${generalInfo.name}'s banner`}
+						url={banner.url}
 					/>
 					<div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
 						<div className="space-y-1">

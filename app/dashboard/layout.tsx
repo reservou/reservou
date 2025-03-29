@@ -100,7 +100,7 @@ export default function DashboardLayout({
 			<NavMobile navItems={navItems} pathname={pathname} />
 			{/* Main Content */}
 			<main className="flex-1 p-4 md:p-8 pt-20 md:pt-8 pb-20 md:pb-8">
-				<div className="max-w-7xl mx-auto">{children}</div>
+				<div className="max-w-7xl mx-auto p-0 xl:px-24">{children}</div>
 			</main>
 		</div>
 	);

@@ -41,7 +41,7 @@ export const signInWithGoogle = buildAction(
 
 		const jwtPayload: AccessTokenPayload = {
 			uid: id,
-			hid: hotel?.id.toString(),
+			hid: hotel?._id.toString(),
 		};
 
 		const jwtToken = await encryptJwt(jwtPayload);

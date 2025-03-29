@@ -1,5 +1,6 @@
 "server-only";
 
+import { database } from "@/src/lib/database";
 import {
 	ForbiddenError,
 	InternalServerError,
@@ -28,6 +29,7 @@ export async function getCurrentUserHotelOrThrow() {
 		});
 	}
 
+	await database.connect();
 	const hotel = await HotelModel.findOne({ _id: hid });
 
 	if (!hotel) {
