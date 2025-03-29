@@ -1,6 +1,7 @@
 export const MAX_PHOTOS_NUM = 6;
 
-export const MAX_PHOTOS_REACHED = "Você só pode adicionar 6 fotos";
+export const MAX_PHOTOS_REACHED =
+	"Sua galeria está cheia, você só pode escolher até 6 fotos";
 
 /**
  * 15 minutes in milliseconds
