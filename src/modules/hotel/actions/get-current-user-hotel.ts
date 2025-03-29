@@ -8,7 +8,6 @@ import { getCurrentUserHotelOrThrow } from "../utils/get-current-user-hotel-or-t
 
 export type GetCurrentUserHotelOutput = Omit<IHotel, "geolocation"> & {
 	id: string;
-	bannerUrl: string;
 };
 
 export const getCurrentUserHotel = buildAction(
@@ -23,7 +22,11 @@ export const getCurrentUserHotel = buildAction(
 			category: hotel.category,
 			description: hotel.description,
 			amenities: hotel.amenities,
-			bannerFileKey: hotel.bannerFileKey,
+			banner: hotel.banner && {
+				url: hotel.banner.url,
+				fileKey: hotel.banner.fileKey,
+				alt: hotel.banner.alt,
+			},
 			contact: {
 				email: hotel.contact.email,
 				phone: hotel.contact.phone,
@@ -37,14 +40,10 @@ export const getCurrentUserHotel = buildAction(
 				zipCode: hotel.location.zipCode,
 			},
 			photos: hotel.photos.map((photo) => ({
-				id: photo.id,
 				fileKey: photo.fileKey,
 				alt: photo.alt,
+				url: photo.url,
 			})),
-			bannerUrl: await storage.getSignedUrl(
-				hotel.bannerFileKey,
-				PHOTO_EXPIRY_MS,
-			),
 			plan: hotel.plan,
 			planExpiresAt: hotel.planExpiresAt,
 			updatedAt: hotel.updatedAt,

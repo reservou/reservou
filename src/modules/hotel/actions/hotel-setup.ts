@@ -84,6 +84,9 @@ export const hotelSetup = buildAction(
 				phone,
 				website,
 			},
+			banner: null,
+			amenities: [],
+			photos: [],
 			description,
 			category,
 			slug: await generateUniqueSlug({ city, country, name }),
@@ -117,7 +120,13 @@ export const hotelSetup = buildAction(
 			description: hotel.description,
 			formattedAddress: hotel.formattedAddress,
 			amenities: hotel.amenities,
-			bannerFileKey: hotel.bannerFileKey,
+			banner: hotel.banner
+				? {
+						alt: hotel.banner.alt,
+						url: hotel.banner.url,
+						fileKey: hotel.banner.fileKey,
+					}
+				: null,
 			contact: hotel.contact,
 			location: hotel.location,
 			photos: hotel.photos,
