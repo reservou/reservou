@@ -21,7 +21,7 @@ export interface IHotel {
 		city: string;
 		state: string;
 		country: string;
-		zipCode?: string;
+		zipCode: string;
 	};
 	contact: {
 		email: string;
@@ -29,11 +29,15 @@ export interface IHotel {
 		website?: string;
 	};
 	category: string;
-	bannerFileKey: string;
-	photos: Array<{
-		id: string;
+	banner: {
+		url: string;
 		fileKey: string;
 		alt: string;
+	} | null;
+	photos: Array<{
+		fileKey: string;
+		alt: string;
+		url: string;
 	}>;
 	amenities: string[];
 	plan: Plan;
@@ -63,7 +67,7 @@ const HotelSchema: Schema = new Schema({
 		city: { type: String, required: true },
 		state: { type: String, required: true },
 		country: { type: String, required: true },
-		zipCode: { type: String },
+		zipCode: { type: String, required: true },
 	},
 	contact: {
 		email: { type: String, required: true },
@@ -71,12 +75,19 @@ const HotelSchema: Schema = new Schema({
 		website: { type: String },
 	},
 	category: { type: String, required: true },
-	bannerFileKey: { type: String, default: "" },
+	banner: {
+		type: {
+			fileKey: { type: String, required: true, unique: true },
+			alt: { type: String, default: "" },
+			url: { type: String, required: true },
+		},
+		default: null,
+	},
 	photos: [
 		{
-			id: { type: String, required: true },
-			fileKey: { type: String, required: true },
+			fileKey: { type: String, required: true, unique: true },
 			alt: { type: String, default: "" },
+			url: { type: String, required: true },
 		},
 	],
 	amenities: [{ type: String }],
@@ -91,7 +102,7 @@ const HotelSchema: Schema = new Schema({
 });
 
 /**
- * Generates a unique SEO friendly slug for the hotel following {@link strategies} strategies
+ * Generates a unique SEO friendly slug for the hotel following  strategies
  */
 export async function generateUniqueSlug(
 	params: SlugGenerationParams,

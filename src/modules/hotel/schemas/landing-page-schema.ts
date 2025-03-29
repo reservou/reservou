@@ -8,8 +8,7 @@ export const generalInfoSchema = z.object({
 		})
 		.max(100, {
 			message: "O nome do hotel não pode exceder 100 caracteres",
-		})
-		.optional(),
+		}),
 	slug: z
 		.string()
 		.min(2, {
@@ -20,8 +19,7 @@ export const generalInfoSchema = z.object({
 		})
 		.regex(/^@?[a-z0-9-]+$/, {
 			message: "O slug deve conter apenas letras minúsculas, números e hífens",
-		})
-		.optional(),
+		}),
 	description: z
 		.string()
 		.min(10, {
@@ -33,8 +31,7 @@ export const generalInfoSchema = z.object({
 		.refine(
 			(slug) => !RESERVED_SLUGS.includes(slug),
 			"Essa slug é reservada e não pode ser utilizada",
-		)
-		.optional(),
+		),
 });
 
 export const locationSchema = z.object({
@@ -45,8 +42,7 @@ export const locationSchema = z.object({
 		})
 		.max(200, {
 			message: "O endereço não pode exceder 200 caracteres",
-		})
-		.optional(),
+		}),
 	city: z
 		.string()
 		.min(2, {
@@ -54,8 +50,7 @@ export const locationSchema = z.object({
 		})
 		.max(100, {
 			message: "A cidade não pode exceder 100 caracteres",
-		})
-		.optional(),
+		}),
 	state: z
 		.string()
 		.min(2, {
@@ -63,8 +58,7 @@ export const locationSchema = z.object({
 		})
 		.max(100, {
 			message: "O estado não pode exceder 100 caracteres",
-		})
-		.optional(),
+		}),
 	country: z
 		.string()
 		.min(2, {
@@ -72,8 +66,7 @@ export const locationSchema = z.object({
 		})
 		.max(100, {
 			message: "O país não pode exceder 100 caracteres",
-		})
-		.optional(),
+		}),
 	zipCode: z
 		.string()
 		.min(5, {
@@ -81,24 +74,19 @@ export const locationSchema = z.object({
 		})
 		.max(20, {
 			message: "O CEP não pode exceder 20 caracteres",
-		})
-		.optional(),
-	location: z
-		.string()
-		.min(2, {
-			message: "A localização deve ter pelo menos 2 caracteres",
-		})
-		.max(200, {
-			message: "A localização não pode exceder 200 caracteres",
-		})
-		.optional(),
+		}),
 });
 
 export const amenitiesSchema = z.object({
 	amenities: z.array(
-		z.string().min(1, {
-			message: "A comodidade não pode estar vazia",
-		}),
+		z
+			.string()
+			.min(1, {
+				message: "A comodidade não pode estar vazia",
+			})
+			.max(30, {
+				message: "A comodidade não pode exceder 30 caracteres",
+			}),
 	),
 });
 
